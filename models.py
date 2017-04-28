@@ -25,7 +25,7 @@ class Model(ABC):
 
 class LogisticRegression(Model):
 
-    def __init__(self, n_samples=None, n_inter=None, inference='mcmc'):
+    def __init__(self, n_samples=None, n_inter=None, inference='variational'):
         self.inference = inference
         self.n_samples = n_samples
         self.n_iter = n_iter
@@ -33,14 +33,14 @@ class LogisticRegression(Model):
     def _inference(self, X_data, y_data):
         N, D = X_data.shape
         X = tf.placeholder(tf.float32, [N, D])
-        W = Normal(mu=tf.zeros([D]), sigma=tf.ones([D]))
-        b = Normal(mu=tf.zeros([1]), sigma=tf.ones([1]))
+        W = Normal(mu=tf.zeros([D, 1]), sigma=tf.ones([D, 1]))
+        b = Normal(mu=tf.zeros([1, 1]), sigma=tf.ones([1, 1]))
         y = Categorical(logits=ed.dot(X, W) + b)
 
-        qW = Normal(mu=tf.Variable(tf.random_normal([D])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
-        qb = Normal(mu=tf.Variable(tf.random_normal([1])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+        qW = Normal(mu=tf.Variable(tf.random_normal([D, 1])),
+                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, 1]))))
+        qb = Normal(mu=tf.Variable(tf.random_normal([1, 1])),
+                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 1]))))
 
         inference = ed.KLqp({W: qW, b: qb}, data={X: X_data, y: y_data})
         inference.run(n_samples=self.n_samples, n_iter=self.n_iter)

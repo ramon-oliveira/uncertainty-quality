@@ -1,3 +1,6 @@
+# Uncertainty Quality
+
+
 Fatores de variação:
 1) Dataset: MNIST com classes inside e outside
 2) Inferência: Maximum Likelihood ou MAP, Dropout, VI, SGLD ou SGHMC
