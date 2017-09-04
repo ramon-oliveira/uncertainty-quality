@@ -16,3 +16,10 @@ Fatores em aberto:
 1) Outros datasets
 2) OSBA
 3) Classes unknown com label distribuição uniforme
+
+# Applications
+
+- http://www.biorxiv.org/content/early/2016/10/28/084210
+- https://arxiv.org/abs/1708.08843
+
+
