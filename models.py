@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-
+import numpy as np
 import tensorflow as tf
 import edward as ed
 from edward.models import Normal, Categorical
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dropout
+from sklearn.preprocessing import LabelEncoder
 
 
 class Model(ABC):
@@ -25,30 +26,51 @@ class Model(ABC):
 
 class LogisticRegression(Model):
 
-    def __init__(self, n_samples=None, n_inter=None, inference='variational'):
+    def __init__(self, n_samples=5, n_iter=100, inference='variational'):
         self.inference = inference
         self.n_samples = n_samples
         self.n_iter = n_iter
-
-    def _inference(self, X_data, y_data):
-        N, D = X_data.shape
-        X = tf.placeholder(tf.float32, [N, D])
-        W = Normal(mu=tf.zeros([D, 1]), sigma=tf.ones([D, 1]))
-        b = Normal(mu=tf.zeros([1, 1]), sigma=tf.ones([1, 1]))
-        y = Categorical(logits=ed.dot(X, W) + b)
-
-        qW = Normal(mu=tf.Variable(tf.random_normal([D, 1])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([D, 1]))))
-        qb = Normal(mu=tf.Variable(tf.random_normal([1, 1])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([1, 1]))))
-
-        inference = ed.KLqp({W: qW, b: qb}, data={X: X_data, y: y_data})
-        inference.run(n_samples=self.n_samples, n_iter=self.n_iter)
+        self.model = None
 
     def fit(self, X, y):
-        self._inference(X, y)
+        self.label_encoder = LabelEncoder().fit(y)
+        y = self.label_encoder.transform(y)
 
-    def predict_proba(X):
-        y_post = Normal(mu=ed.dot(X, qw) + qb, sigma=tf.ones([N]))
-        tf.eval()
-        ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test})
+        DIN = X.shape[1]
+        DOUT = len(set(y))
+
+        X_data = tf.placeholder(tf.float32, [None, DIN])
+        W = Normal(mu=tf.zeros([DIN, DOUT]), sigma=tf.ones([DIN, DOUT]))
+        b = Normal(mu=tf.zeros([DOUT]), sigma=tf.ones([DOUT]))
+        y_data = Categorical(logits=tf.matmul(X_data, W) + b)
+
+        qW = Normal(mu=tf.Variable(tf.random_normal([DIN, DOUT])),
+                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([DIN, DOUT]))))
+        qb = Normal(mu=tf.Variable(tf.random_normal([DOUT])),
+                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([DOUT]))))
+
+        self.model = ed.KLqp({W: qW, b: qb}, data={X_data: X, y_data: y})
+        self.model.run(n_samples=self.n_samples, n_iter=self.n_iter)
+
+        self.W = qW
+        self.b = qb
+
+    def predict_proba(self, X):
+        W = self.W.eval()
+        b = self.b.eval()
+        return np.matmul(X, W) + b
+
+    def predict(self, X):
+        return self.predict_proba(X).argmax(axis=1)
+
+
+
+def load(model):
+    name = model.pop('name')
+
+    if name == 'logistic_regression':
+        model = LogisticRegression(**model)
+    else:
+        raise Exception('Unknown model {0}'.format(model))
+
+    return model
