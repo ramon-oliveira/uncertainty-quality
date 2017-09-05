@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 import edward as ed
-from edward.models import Normal, Categorical
+from edward.models import Normal, Categorical, Multinomial
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.layers import Dropout
@@ -40,14 +40,14 @@ class LogisticRegression(Model):
         DOUT = len(set(y))
 
         X_data = tf.placeholder(tf.float32, [None, DIN])
-        W = Normal(mu=tf.zeros([DIN, DOUT]), sigma=tf.ones([DIN, DOUT]))
-        b = Normal(mu=tf.zeros([DOUT]), sigma=tf.ones([DOUT]))
+        W = Normal(loc=tf.zeros([DIN, DOUT]), scale=tf.ones([DIN, DOUT]))
+        b = Normal(loc=tf.zeros([DOUT]), scale=tf.ones([DOUT]))
         y_data = Categorical(logits=tf.matmul(X_data, W) + b)
 
-        qW = Normal(mu=tf.Variable(tf.random_normal([DIN, DOUT])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([DIN, DOUT]))))
-        qb = Normal(mu=tf.Variable(tf.random_normal([DOUT])),
-                    sigma=tf.nn.softplus(tf.Variable(tf.random_normal([DOUT]))))
+        qW = Normal(loc=tf.Variable(tf.random_normal([DIN, DOUT])),
+                    scale=tf.nn.softplus(tf.Variable(tf.random_normal([DIN, DOUT]))))
+        qb = Normal(loc=tf.Variable(tf.random_normal([DOUT])),
+                    scale=tf.nn.softplus(tf.Variable(tf.random_normal([DOUT]))))
 
         self.model = ed.KLqp({W: qW, b: qb}, data={X_data: X, y_data: y})
         self.model.run(n_samples=self.n_samples, n_iter=self.n_iter)
