@@ -5,8 +5,12 @@ import edward as ed
 from edward.models import Normal, Categorical, Multinomial
 from keras.models import Sequential
 from keras.layers import Dense
+from keras.layers import Activation
 from keras.layers import Dropout
+from keras.layers import Lambda
+from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
+from sklearn.preprocessing import OneHotEncoder
 
 
 class Model(ABC):
@@ -34,7 +38,7 @@ class LogisticRegression(Model):
 
     def fit(self, X, y):
         self.label_encoder = LabelEncoder().fit(y)
-        y = self.label_encoder.transform(y)
+        y = self.oh_encoder.transform(y)
 
         DIN = X.shape[1]
         DOUT = len(set(y))
@@ -64,12 +68,55 @@ class LogisticRegression(Model):
         return self.predict_proba(X).argmax(axis=1)
 
 
+class MLP(Model):
+
+    def __init__(self, epochs=10, batch_size=32, inference='dropout'):
+        self.epochs = epochs
+        self.batch_size = batch_size
+        self.inference = inference
+        self.model = None
+
+    def fit(self, X, y):
+        self.label_encoder = LabelEncoder().fit(y)
+        n_labels = len(self.label_encoder.classes_)
+        y = np.eye(n_labels)[y]
+
+        model = Sequential()
+
+        model.add(Dense(1024, activation='relu', input_shape=(X.shape[1],)))
+
+        if self.inference == 'dropout':
+            model.add(Lambda(lambda x: K.dropout(x, level=0.5)))
+        else:
+            model.add(Dropout(0.5))
+        model.add(Dense(1024, activation='relu'))
+
+        if self.inference == 'dropout':
+            model.add(Lambda(lambda x: K.dropout(x, level=0.5)))
+        else:
+            model.add(Dropout(0.5))
+        model.add(Dense(n_labels, activation='softmax'))
+
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
+
+        self.model = model
+
+
+    def predict_proba(self, X):
+        return self.model.predict_proba(X, verbose=0)
+
+    def predict(self, X):
+        return self.predict_proba(X).argmax(axis=1)
+
 
 def load(model):
     name = model.pop('name')
 
     if name == 'logistic_regression':
         model = LogisticRegression(**model)
+    elif name == 'mlp':
+        model = MLP(**model)
     else:
         raise Exception('Unknown model {0}'.format(model))
 
