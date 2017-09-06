@@ -4,6 +4,7 @@ from sacred.observers import FileStorageObserver
 from sacred.utils import apply_backspaces_and_linefeeds
 import datasets
 import models
+import tqdm
 from scipy.stats import entropy
 
 ex = Experiment('uncertainty-quality')
@@ -16,8 +17,8 @@ def cfg():
     seed = 1337
 
     dataset = {
-        # 'name': 'mnist',
-        'name': 'cifar10',
+        'name': 'mnist',
+        # 'name': 'cifar10',
         'test_size': 0.2,
     }
 
@@ -30,18 +31,19 @@ def cfg():
     # }
 
     model = {
-        'name': 'mlp',
-        'epochs': 1,
-        'inference': 'maximum_likelihood',
-        # 'inference': 'dropout',
+        'name': 'cnn',
+        'epochs': 10,
+        # 'inference': 'maximum_likelihood',
+        'inference': 'dropout',
     }
 
-    posterior_samples = 50
+    posterior_samples = 20
 
 
 @ex.capture
 def train(model, dataset):
     X, y = dataset.train()
+    X = X.reshape(-1, 1, 28, 28)
     model.fit(X, y)
     # model.model.save_weights('runs/weights.hdf5')
     # model.model.load_weights('runs/weights.hdf5')
@@ -70,20 +72,25 @@ def entropy_uncertainty(y_score):
 @ex.capture
 def evaluate(model, dataset, posterior_samples, _log):
     X_test, y_test = dataset.test()
+    X_test = X_test.reshape(-1, 1, 28, 28)
 
     y_test_score = np.array([model.predict_proba(X_test)
-                             for _ in range(posterior_samples)])
+                             for _ in tqdm.tqdm(range(posterior_samples), desc='sampling')])
+
+    y_test_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
+                                   for _ in tqdm.tqdm(range(posterior_samples), desc='sampling')])
 
     y_test_pred = y_test_score.mean(axis=0).argmax(axis=1)
     y_test_pred = model.label_encoder.inverse_transform(y_test_pred)
+
     acc_test = (y_test == y_test_pred).mean()
     _log.info('test accuracy: {0:.2f}'.format(acc_test*100))
     ex.info['accuracy_test'] = acc_test
 
-    y, y_uncertainty = std_uncertainty(y_test_score)
+    y, y_uncertainty = std_uncertainty(y_test_score_proba)
     l = np.array(sorted(zip(y_uncertainty, model.label_encoder.inverse_transform(y), y_test)))
     prop_acc = []
-    for end in range(50, len(y), 10):
+    for end in range(50, len(y), 20):
         prop = end/len(y)
         acc = (l[:end, 1] == l[:end, 2]).mean()
         prop_acc.append([prop, acc])
@@ -98,13 +105,19 @@ def evaluate(model, dataset, posterior_samples, _log):
         prop_acc.append([prop, acc])
     ex.info['prop_acc_uncertainty_entropy'] = prop_acc
 
+    y, y_uncertainty = entropy_uncertainty(y_test_score_proba)
+    l = np.array(sorted(zip(y_uncertainty, model.label_encoder.inverse_transform(y), y_test)))
+    prop_acc = []
+    for end in range(50, len(y), 10):
+        prop = end/len(y)
+        acc = (l[:end, 1] == l[:end, 2]).mean()
+        prop_acc.append([prop, acc])
+    ex.info['prop_acc_uncertainty_entropy_proba'] = prop_acc
+
 @ex.automain
 def run(model, dataset):
     model = models.load(model)
     dataset = datasets.load(dataset)
-
-    X_train, y_train = dataset.train()
-    X_test, y_test = dataset.test()
 
     train(model, dataset)
     evaluate(model, dataset)
