@@ -17,11 +17,6 @@ from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
-import torch
-import numpy as np
-import torch.nn as nn
-from torch.autograd import Variable
-
 
 class Model(ABC):
 
@@ -141,17 +136,17 @@ class CNN(Model):
         model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
         self.model = model
 
-        # proba_model = Sequential()
-        # proba_model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-        # proba_model.add(Conv2D(64, (3, 3), activation='relu'))
-        # proba_model.add(MaxPooling2D(pool_size=(2, 2)))
-        # proba_model.add(BayesianDropout(0.5))
-        # proba_model.add(Flatten())
-        # proba_model.add(Dense(128, activation='relu'))
-        # proba_model.add(BayesianDropout(0.5))
-        # proba_model.add(Dense(num_classes, activation='softmax'))
-        # proba_model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
-        # self.proba_model = proba_model
+        proba_model = Sequential()
+        proba_model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        proba_model.add(Conv2D(64, (3, 3), activation='relu'))
+        proba_model.add(MaxPooling2D(pool_size=(2, 2)))
+        proba_model.add(BayesianDropout(0.5))
+        proba_model.add(Flatten())
+        proba_model.add(Dense(128, activation='relu'))
+        proba_model.add(BayesianDropout(0.5))
+        proba_model.add(Dense(num_classes, activation='softmax'))
+        proba_model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        self.proba_model = proba_model
         self.proba_model = model
 
     def fit(self, X, y):
