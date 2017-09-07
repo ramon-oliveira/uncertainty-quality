@@ -9,6 +9,10 @@ from keras.layers import Dense
 from keras.layers import Activation
 from keras.layers import Dropout
 from keras.layers import Lambda
+from keras.layers import Conv2D
+from keras.layers import MaxPooling2D
+from keras.layers import Flatten
+from layers import BayesianDropout
 from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
@@ -17,7 +21,6 @@ import torch
 import numpy as np
 import torch.nn as nn
 from torch.autograd import Variable
-
 
 
 class Model(ABC):
@@ -106,8 +109,9 @@ class MLP(Model):
 
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
-
         self.model = model
+
+        return self
 
 
     def predict_proba(self, X):
@@ -117,102 +121,52 @@ class MLP(Model):
         return self.predict_proba(X).argmax(axis=1)
 
 
-class TorchCNN(nn.Module):
-    def __init__(self):
-        super(TorchCNN, self).__init__()
-        self.layer1 = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=5, padding=2),
-            #nn.BatchNorm2d(16),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.dropout1 = nn.Dropout(0.5)
-        self.layer2 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=5, padding=2),
-            #nn.BatchNorm2d(32),
-            nn.ReLU(),
-            nn.MaxPool2d(2))
-        self.dropout2 = nn.Dropout(0.5)
-        self.fc = nn.Linear(7*7*32, 10)
-
-    def forward(self, x):
-        out = self.layer1(x)
-        out = self.dropout1(out)
-        out = self.layer2(out)
-        out = self.dropout2(out)
-        out = out.view(out.size(0), -1)
-        out = self.fc(out)
-        return out
-
-
 class CNN(Model):
 
-    def __init__(self, epochs=10, batch_size=32, inference='dropout', cuda=False):
+    def __init__(self, input_shape, num_classes, epochs=10, batch_size=32):
+        self.input_shape = input_shape
+        self.num_classes = num_classes
         self.epochs = epochs
         self.batch_size = batch_size
-        self.inference = inference
-        self.cuda = cuda
-        self.cnn = TorchCNN()
-        if cuda:
-            cnn.cuda()
 
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.cnn.parameters())
+        model = Sequential()
+        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.5))
+        model.add(Flatten())
+        model.add(Dense(128, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(num_classes, activation='softmax'))
+        model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        self.model = model
+
+        # proba_model = Sequential()
+        # proba_model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+        # proba_model.add(Conv2D(64, (3, 3), activation='relu'))
+        # proba_model.add(MaxPooling2D(pool_size=(2, 2)))
+        # proba_model.add(BayesianDropout(0.5))
+        # proba_model.add(Flatten())
+        # proba_model.add(Dense(128, activation='relu'))
+        # proba_model.add(BayesianDropout(0.5))
+        # proba_model.add(Dense(num_classes, activation='softmax'))
+        # proba_model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        # self.proba_model = proba_model
+        self.proba_model = model
 
     def fit(self, X, y):
-        self.label_encoder = LabelEncoder().fit(y)
-        n_labels = len(set(y))
-
-        for epoch in range(self.epochs):
-            idxs = np.arange(len(X))
-            np.random.shuffle(idxs)
-            for end in tqdm.tqdm(range(self.batch_size, len(idxs), self.batch_size), desc='Epoch {}'.format(epoch+1)):
-                X_batch = X[end-self.batch_size:end]
-                y_batch = y[end-self.batch_size:end]
-                images = Variable(torch.from_numpy(X_batch.astype('float32')))
-                labels = Variable(torch.from_numpy(y_batch.astype('long')))
-
-                if self.cuda:
-                    images = images.cuda()
-                    labels = labels.cuda()
-
-                self.optimizer.zero_grad()
-                outputs = self.cnn(images)
-                loss = self.criterion(outputs, labels)
-                loss.backward()
-                self.optimizer.step()
+        self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
+        self.proba_model.set_weights(self.model.get_weights())
 
     def predict_proba(self, X, probabilistic=False):
+        model = self.model
         if probabilistic:
-            self.cnn.train()
-        else:
-            self.cnn.eval()
+            model = self.proba_model
 
-        idxs = np.arange(len(X))
-        outputs = []
-        for end in range(self.batch_size, len(idxs) + (len(idxs)%self.batch_size)+1, self.batch_size):
-            X_batch = X[end-self.batch_size:end]
-            images = Variable(torch.from_numpy(X_batch.astype('float32')))
-            outputs.append(self.cnn(images).data.numpy())
-
-        y = np.concatenate(outputs, axis=0)
-
-        return y
+        return model.predict(X, batch_size=self.batch_size, verbose=0)
 
     def predict(self, X, probabilistic=False):
-        if probabilistic:
-            self.cnn.train()
-        else:
-            self.cnn.eval()
-
-        idxs = np.arange(len(X))
-        np.random.shuffle(idxs)
-        outputs = []
-        for end in range(self.batch_size, len(idxs), self.batch_size):
-            X_batch = X[end-self.batch_size:end]
-            images = Variable(torch.from_numpy(X_batch.astype('float32')))
-            outputs.append(self.cnn(images).data.numpy())
-        y = np.concatenate(outputs, axis=0)
-
+        y = self.predict_proba(X, probabilistic)
         return y.argmax(axis=1)
 
 
