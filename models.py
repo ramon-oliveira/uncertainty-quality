@@ -105,9 +105,7 @@ class MLP(Model):
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
         self.model = model
-
         return self
-
 
     def predict_proba(self, X):
         return self.model.predict_proba(X, verbose=0)
@@ -147,7 +145,6 @@ class CNN(Model):
         proba_model.add(Dense(num_classes, activation='softmax'))
         proba_model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
         self.proba_model = proba_model
-        self.proba_model = model
 
     def fit(self, X, y):
         self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)

@@ -85,6 +85,10 @@ def evaluate(model, dataset, posterior_samples, _log):
     y_test_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
                                    for _ in tqdm.tqdm(range(posterior_samples), desc='sampling')])
 
+    # ex.info['y_test'] = y_test.tolist()
+    # ex.info['y_test_score'] = y_test_score.tolist()
+    # ex.info['y_test_score_proba'] = y_test_score_proba.tolist()
+
     y_test_pred = y_test_score.mean(axis=0).argmax(axis=1)
 
     acc_test = (y_test == y_test_pred).mean()
