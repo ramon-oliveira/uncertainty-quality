@@ -23,22 +23,15 @@ def cfg():
     seed = 1337
 
     dataset_settings = {
-        'name': 'mnist',
-        # 'name': 'cifar10',
+        'name': 'cifar10',
         'test_size': 0.2,
     }
 
-    # model_settings = {
-    #     'name': 'logistic_regression',
-    #     'inference': 'variational',
-    #     'n_iter': 1000,
-    #     'n_samples': 5,
-    # }
     model_settings = {
         'name': 'cnn',
-        'input_shape': [28, 28, 1],
+        'input_shape': [32, 32, 3],
         'num_classes': 10,
-        'epochs': 5,
+        'epochs': 20,
     }
 
     posterior_samples = 50

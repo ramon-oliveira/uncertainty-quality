@@ -147,7 +147,7 @@ class CNN(Model):
         self.proba_model = proba_model
 
     def fit(self, X, y):
-        self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size)
+        self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size, validation_split=0.1)
         self.proba_model.set_weights(self.model.get_weights())
 
     def predict_proba(self, X, probabilistic=False):
