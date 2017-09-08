@@ -57,12 +57,14 @@ class Digits(Dataset):
 
 class MNIST(Dataset):
 
-    def __init__(self, test_size, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(MNIST, self).__init__(*args, **kwargs)
 
         (X_train, y_train), (X_test, y_test) = mnist.load_data()
         X_train = X_train/128
         X_test = X_test/128
+        y_train = y_train.ravel()
+        y_test = y_test.ravel()
         idxs = np.arange(X_train.shape[0])
         np.random.shuffle(idxs)
 
@@ -74,12 +76,14 @@ class MNIST(Dataset):
 
 class CIFAR10(Dataset):
 
-    def __init__(self, test_size, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(CIFAR10, self).__init__(*args, **kwargs)
 
         (X_train, y_train), (X_test, y_test) = cifar10.load_data()
         X_train = X_train/128
         X_test = X_test/128
+        y_train = y_train.ravel()
+        y_test = y_test.ravel()
         idxs = np.arange(X_train.shape[0])
         np.random.shuffle(idxs)
 
