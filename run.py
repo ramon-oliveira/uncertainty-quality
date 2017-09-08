@@ -74,7 +74,7 @@ def evaluate(model, dataset, posterior_samples, _log):
     y_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
                               for i in tqdm.tqdm(range(posterior_samples), desc='sampling')])
 
-    acc_test = (y_test == y_test_pred).mean()
+    acc_test = (y_test == y_pred).mean()
     ex.info['accuracy_test'] = acc_test
     _log.info('test accuracy: {0:.2f}'.format(acc_test*100))
 
