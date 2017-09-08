@@ -5,6 +5,7 @@ import edward as ed
 import tqdm
 from edward.models import Normal, Categorical, Multinomial
 from keras.models import Sequential
+from keras import optimizers
 from keras.layers import Dense
 from keras.layers import Activation
 from keras.layers import Dropout
@@ -143,7 +144,8 @@ class CNN(Model):
         model.add(Dropout(0.5))
         model.add(Dense(num_classes))
         model.add(Activation('softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
         probabilistic_model = Sequential()
@@ -165,7 +167,8 @@ class CNN(Model):
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(num_classes))
         probabilistic_model.add(Activation('softmax'))
-        probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
     def fit(self, X_train, y_train, X_val, y_val):
@@ -176,7 +179,7 @@ class CNN(Model):
                        epochs=self.epochs,
                        batch_size=self.batch_size,
                        validation_data=(X_val, y_val),
-                       callbacks=[cp, es])
+                       callbacks=[cp])
         self.model.load_weights('runs/weights.hdf5')
         self.probabilistic_model.set_weights(self.model.get_weights())
 
