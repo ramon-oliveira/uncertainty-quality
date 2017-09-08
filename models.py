@@ -149,7 +149,7 @@ class CNN(Model):
         self.proba_model = proba_model
 
     def fit(self, X_train, y_train, X_val, y_val):
-        es = EarlyStopping(monitor='val_loss', patience=5)
+        es = EarlyStopping(monitor='val_loss', patience=10)
         cp = ModelCheckpoint('runs/weights.hdf5', save_best_only=True)
 
         self.model.fit(X_train, y_train,
