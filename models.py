@@ -13,6 +13,7 @@ from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
 from keras.callbacks import EarlyStopping
+from keras.callbacks import ModelCheckpoint
 from layers import BayesianDropout
 from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
@@ -148,15 +149,18 @@ class CNN(Model):
         self.proba_model = proba_model
 
     def fit(self, X_train, y_train, X_val, y_val):
-        early_stop = EarlyStopping(monitor='val_loss', patience=2)
+        es = EarlyStopping(monitor='val_loss', patience=5)
+        cp = ModelCheckpoint('runs/weights.hdf5', save_best_only=True)
 
         self.model.fit(X_train, y_train,
                        epochs=self.epochs,
                        batch_size=self.batch_size,
                        validation_data=(X_val, y_val),
-                       callbacks=[early_stop])
-
+                       callbacks=[cp, es])
+        self.model.load_weights('runs/weights.hdf5')
         self.proba_model.set_weights(self.model.get_weights())
+
+        return self
 
     def predict_proba(self, X, probabilistic=False):
         model = self.model

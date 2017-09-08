@@ -24,12 +24,11 @@ def cfg():
 
     dataset_settings = {
         'name': 'cifar10',
-        'test_size': 0.2,
     }
 
     model_settings = {
         'name': 'cnn',
-        'epochs': 20,
+        'epochs': 100,
     }
 
     posterior_samples = 50
@@ -69,25 +68,25 @@ def uncertainty_entropy(y_score):
 def evaluate(model, dataset, posterior_samples, _log):
     X_test, y_test = dataset.test_data
 
-    y_score = np.expand_dims(model.predict_proba(X_test), axis=0)
-    y_pred = y_score.mean(axis=0).argmax(axis=1)
+    y_score = np.array([model.predict_proba(X_test)])
     y_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
                               for i in tqdm.tqdm(range(posterior_samples), desc='sampling')])
+    y_pred = y_score.mean(axis=0).argmax(axis=1)
 
     acc_test = (y_test == y_pred).mean()
     ex.info['accuracy_test'] = acc_test
-    _log.info('test accuracy: {0:.2f}'.format(acc_test*100))
+    _log.info('test accuracy: {0:.2f}'.format(acc_test))
 
-    y, y_uncertainty = std_uncertainty(y_score_proba)
+    y, y_uncertainty = uncertainty_std(y_score_proba)
     l = np.array(sorted(zip(y_uncertainty, y_test, y)))
     prop_acc = []
-    for end in range(50, len(y), 20):
+    for end in range(50, len(y), 10):
         prop = end/len(y)
         acc = (l[:end, 1] == l[:end, 2]).mean()
         prop_acc.append([prop, acc])
     ex.info['uncertainty_std'] = prop_acc
 
-    y, y_uncertainty = entropy_uncertainty(y_score)
+    y, y_uncertainty = uncertainty_entropy(y_score)
     l = np.array(sorted(zip(y_uncertainty, y_test, y)))
     prop_acc = []
     for end in range(50, len(y), 10):
