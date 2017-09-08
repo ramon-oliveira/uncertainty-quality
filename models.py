@@ -12,6 +12,7 @@ from keras.layers import Lambda
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
+from keras.callbacks import EarlyStopping
 from layers import BayesianDropout
 from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
@@ -131,7 +132,7 @@ class CNN(Model):
         model.add(Dense(128, activation='relu'))
         model.add(Dropout(0.5))
         model.add(Dense(num_classes, activation='softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.model = model
 
         proba_model = Sequential()
@@ -143,11 +144,18 @@ class CNN(Model):
         proba_model.add(Dense(128, activation='relu'))
         proba_model.add(BayesianDropout(0.5))
         proba_model.add(Dense(num_classes, activation='softmax'))
-        proba_model.compile(loss='categorical_crossentropy', optimizer='adadelta', metrics=['accuracy'])
+        proba_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.proba_model = proba_model
 
-    def fit(self, X, y):
-        self.model.fit(X, y, epochs=self.epochs, batch_size=self.batch_size, validation_split=0.1)
+    def fit(self, X_train, y_train, X_val, y_val):
+        early_stop = EarlyStopping(monitor='val_loss', patience=2)
+
+        self.model.fit(X_train, y_train,
+                       epochs=self.epochs,
+                       batch_size=self.batch_size,
+                       validation_data=(X_val, y_val),
+                       callbacks=[early_stop])
+
         self.proba_model.set_weights(self.model.get_weights())
 
     def predict_proba(self, X, probabilistic=False):

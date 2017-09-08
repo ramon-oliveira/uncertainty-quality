@@ -29,8 +29,6 @@ def cfg():
 
     model_settings = {
         'name': 'cnn',
-        'input_shape': [32, 32, 3],
-        'num_classes': 10,
         'epochs': 20,
     }
 
@@ -39,12 +37,12 @@ def cfg():
 
 @ex.capture
 def train(model, dataset):
-    X, y = dataset.train()
-    X = X.reshape(-1, *model.input_shape)
-    y = np.eye(model.num_classes)[y.ravel()]
-    model.fit(X, y)
-    # model.model.save_weights('runs/weights.hdf5')
-    # model.model.load_weights('runs/weights.hdf5')
+    X_train, y_train = dataset.train_data
+    y_train = np.eye(dataset.num_classes)[y_train.ravel()]
+    X_val, y_val = dataset.validation_data
+    y_val = np.eye(dataset.num_classes)[y_val.ravel()]
+
+    model.fit(X_train, y_train, X_val, y_val)
 
 
 @ex.capture
@@ -77,10 +75,6 @@ def evaluate(model, dataset, posterior_samples, _log):
 
     y_test_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
                                    for _ in tqdm.tqdm(range(posterior_samples), desc='sampling')])
-
-    # ex.info['y_test'] = y_test.tolist()
-    # ex.info['y_test_score'] = y_test_score.tolist()
-    # ex.info['y_test_score_proba'] = y_test_score_proba.tolist()
 
     y_test_pred = y_test_score.mean(axis=0).argmax(axis=1)
 
@@ -115,10 +109,19 @@ def evaluate(model, dataset, posterior_samples, _log):
         prop_acc.append([prop, acc])
     ex.info['prop_acc_uncertainty_entropy_proba'] = prop_acc
 
+
 @ex.automain
-def run(model_settings, dataset_settings):
-    model = models.load(model_settings)
+def run(model_settings, dataset_settings, _log):
     dataset = datasets.load(dataset_settings)
+
+    model_settings.update({
+        'input_shape': dataset.input_shape,
+        'num_classes': dataset.num_classes,
+    })
+    model = models.load(model_settings)
+
+    _log.info('dataset_settings: ' + str(dataset_settings))
+    _log.info('model_settings: ' + str(model_settings))
 
     train(model, dataset)
     evaluate(model, dataset)

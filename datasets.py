@@ -30,7 +30,7 @@ class Dataset(object):
 
     @property
     def num_classes(self):
-        return len(self.y_train.unique())
+        return len(np.unique(self.y_train))
 
 
 class Digits(Dataset):
