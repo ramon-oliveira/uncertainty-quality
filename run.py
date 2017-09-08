@@ -44,22 +44,27 @@ def train(model, dataset):
     model.fit(X_train, y_train, X_val, y_val)
 
 
-@ex.capture
-def uncertainty_std(y_score):
-    y_pred = y_score.mean(axis=0).argmax(axis=1)
-    y_std = np.array([y_score[:, i, c].std() for i, c in enumerate(y_pred)])
+def uncertainty_std_argmax(y_probabilistic):
+    y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
+    y_std = np.array([y_probabilistic[:, i, c].std()
+                      for i, c in enumerate(y_pred)])
 
     return y_pred, y_std
 
 
-@ex.capture
-def uncertainty_entropy(y_score):
-    y_mean = y_score.mean(axis=0)
+def uncertainty_std_mean(y_probabilistic):
+    y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
+    y_std_mean = y_probabilistic.std(axis=0).mean(axis=1)
+
+    return y_pred, y_std_mean
+
+
+def uncertainty_entropy(y_deterministic):
     y_entropy = []
-    for y in y_mean:
+    for y in y_deterministic:
         y_entropy.append(entropy(y))
     y_entropy = np.array(y_entropy)
-    y_pred = y_mean.argmax(axis=1)
+    y_pred = y_deterministic.argmax(axis=1)
 
     return y_pred, y_entropy
 
@@ -68,46 +73,44 @@ def uncertainty_entropy(y_score):
 def evaluate(model, dataset, posterior_samples, _log):
     X_test, y_test = dataset.test_data
 
-    y_score = np.array([model.predict_proba(X_test)])
-    y_score_proba = np.array([model.predict_proba(X_test, probabilistic=True)
-                              for i in tqdm.tqdm(range(posterior_samples), desc='sampling')])
-    y_pred = y_score.mean(axis=0).argmax(axis=1)
+    y_deterministic = model.predict_proba(X_test, probabilistic=False)
+    y_probabilistic = [model.predict_proba(X_test, probabilistic=True)
+                       for i in tqdm.trange(posterior_samples, desc='sampling')]
+    y_probabilistic = np.array(y_probabilistic)
+    y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
 
     acc_test = (y_test == y_pred).mean()
     ex.info['accuracy_test'] = acc_test
     _log.info('test accuracy: {0:.2f}'.format(acc_test))
 
-    y, y_uncertainty = uncertainty_std(y_score_proba)
-    l = np.array(sorted(zip(y_uncertainty, y_test, y)))
-    prop_acc = []
-    for end in range(50, len(y), 10):
-        prop = end/len(y)
-        acc = (l[:end, 1] == l[:end, 2]).mean()
-        prop_acc.append([prop, acc])
-    ex.info['uncertainty_std'] = prop_acc
+    uncertainties = [
+        ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
+        ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
+        ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
+    ]
 
-    y, y_uncertainty = uncertainty_entropy(y_score)
-    l = np.array(sorted(zip(y_uncertainty, y_test, y)))
-    prop_acc = []
-    for end in range(50, len(y), 10):
-        prop = end/len(y)
-        acc = (l[:end, 1] == l[:end, 2]).mean()
-        prop_acc.append([prop, acc])
-    ex.info['uncertainty_entropy'] = prop_acc
+    for name, func, y_score in tqdm.tqdm(uncertainties, desc='evaluating'):
+        y_pred, uncertainty = func(y_score)
+        l = np.array(sorted(zip(uncertainty, y_test, y_pred)))
+        prop_acc = []
+        for end in range(50, len(y_pred), 20):
+            prop = end/len(y_pred)
+            acc = (l[:end, 1] == l[:end, 2]).mean()
+            prop_acc.append([prop, acc])
+        ex.info[name] = prop_acc
 
 
 @ex.automain
 def run(model_settings, dataset_settings, _log):
+    _log.info('dataset_settings: ' + str(dataset_settings))
     dataset = datasets.load(dataset_settings)
 
     model_settings.update({
         'input_shape': dataset.input_shape,
         'num_classes': dataset.num_classes,
     })
-    model = models.load(model_settings)
-
-    _log.info('dataset_settings: ' + str(dataset_settings))
     _log.info('model_settings: ' + str(model_settings))
+    model = models.load(model_settings)
 
     train(model, dataset)
     evaluate(model, dataset)
