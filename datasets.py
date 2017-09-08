@@ -6,60 +6,53 @@ from keras.datasets import cifar10
 
 
 class Dataset(object):
-    pass
+
+    def __init__(self, validation_size=0.1, test_size=0.2):
+        self.train_size = 1 - validation_size - test_size
+        self.validation_size = validation_size
+        self.test_size = test_size
+
+    @property
+    def train_data(self):
+        return self.X_train, self.y_train
+
+    @property
+    def validation_data(self):
+        return self.X_val, self.y_val
+
+    @property
+    def test_data(self):
+        return self.X_test, self.y_test
+
+    @property
+    def input_shape(self):
+        return self.X_train.shape[1:]
+
+    @property
+    def num_classes(self):
+        return len(self.y_train.unique())
 
 
 class Digits(Dataset):
 
-    def __init__(self, test_size, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super(Digits, self).__init__(*args, **kwargs)
 
         X, y = datasets.load_digits(return_X_y=True)
-        data = train_test_split(X, y, test_size=test_size)
-        self.X_train = data[0]
-        self.y_train = data[2]
-        self.X_test = data[1]
-        self.y_test = data[3]
+        idxs = np.arange(X.shape[0])
+        np.random.shuffle(idxs)
 
-        self.classes = np.array(list(set(y)))
-        np.random.shuffle(self.classes)
-        self.in_train_classes = self.classes[:10]
-        self.out_train_classes = self.classes[10:]
-        self.unk_train_classes = self.classes[10:]
+        begin = 0
+        end = int(self.train_size*len(idxs))
+        self.X_train, self.y_train = X[idxs][begin:end], y[idxs][begin:end]
 
-    def train(self, with_unk=False):
-        X = self.X_train[np.in1d(self.y_train, self.in_train_classes)]
-        y = self.y_train[np.in1d(self.y_train, self.in_train_classes)]
+        begin = end
+        end = end + int(self.validation_size*len(idxs))
+        self.X_val, self.y_val = X[idxs][begin:end], y[idxs][begin:end]
 
-        if with_unk:
-            X2 = self.X_train[np.in1d(self.y_train, self.unk_train_classes)]
-            y2 = self.y_train[np.in1d(self.y_train, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
-
-    def test(self, with_out=False, with_unk=False):
-        X = self.X_test[np.in1d(self.y_test, self.in_train_classes)]
-        y = self.y_test[np.in1d(self.y_test, self.in_train_classes)]
-
-        if with_out:
-            X2 = self.X_test[np.in1d(self.y_test, self.out_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.out_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        if with_unk:
-            X2 = self.X_test[np.in1d(self.y_test, self.unk_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
-
+        begin = end
+        end = len(idxs)
+        self.X_test, self.y_test = X[idxs][begin:end], y[idxs][begin:end]
 
 
 class MNIST(Dataset):
@@ -68,52 +61,15 @@ class MNIST(Dataset):
         super(MNIST, self).__init__(*args, **kwargs)
 
         (X_train, y_train), (X_test, y_test) = mnist.load_data()
-        X_train = X_train.reshape(X_train.shape[0], -1)/128
-        X_test = X_test.reshape(X_test.shape[0], -1)/128
+        X_train = X_train/128
+        X_test = X_test/128
+        idxs = np.arange(X_train.shape[0])
+        np.random.shuffle(idxs)
 
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_test = X_test
-        self.y_test = y_test
-
-        self.classes = np.array(list(set(y_train)))
-        np.random.shuffle(self.classes)
-        self.in_train_classes = self.classes[:10]
-        self.out_train_classes = self.classes[10:]
-        self.unk_train_classes = self.classes[10:]
-
-    def train(self, with_unk=False):
-        X = self.X_train[np.in1d(self.y_train, self.in_train_classes)]
-        y = self.y_train[np.in1d(self.y_train, self.in_train_classes)]
-
-        if with_unk:
-            X2 = self.X_train[np.in1d(self.y_train, self.unk_train_classes)]
-            y2 = self.y_train[np.in1d(self.y_train, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
-
-    def test(self, with_out=False, with_unk=False):
-        X = self.X_test[np.in1d(self.y_test, self.in_train_classes)]
-        y = self.y_test[np.in1d(self.y_test, self.in_train_classes)]
-
-        if with_out:
-            X2 = self.X_test[np.in1d(self.y_test, self.out_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.out_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        if with_unk:
-            X2 = self.X_test[np.in1d(self.y_test, self.unk_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
+        split = 50000
+        self.X_train, self.y_train = X_train[idxs][:split], y_train[idxs][:split]
+        self.X_val, self.y_val = X_train[idxs][split:], y_train[idxs][split:]
+        self.X_test, self.y_test = X_test, y_test
 
 
 class CIFAR10(Dataset):
@@ -122,54 +78,15 @@ class CIFAR10(Dataset):
         super(CIFAR10, self).__init__(*args, **kwargs)
 
         (X_train, y_train), (X_test, y_test) = cifar10.load_data()
-        X_train = X_train.reshape(X_train.shape[0], -1)/128
-        X_test = X_test.reshape(X_test.shape[0], -1)/128
-        y_train = y_train.ravel()
-        y_test = y_test.ravel()
+        X_train = X_train/128
+        X_test = X_test/128
+        idxs = np.arange(X_train.shape[0])
+        np.random.shuffle(idxs)
 
-        self.X_train = X_train
-        self.y_train = y_train
-        self.X_test = X_test
-        self.y_test = y_test
-
-        self.classes = np.array(list(set(y_train)))
-        np.random.shuffle(self.classes)
-        self.in_train_classes = self.classes[:10]
-        self.out_train_classes = self.classes[10:]
-        self.unk_train_classes = self.classes[10:]
-
-    def train(self, with_unk=False):
-        X = self.X_train[np.in1d(self.y_train, self.in_train_classes)]
-        y = self.y_train[np.in1d(self.y_train, self.in_train_classes)]
-
-        if with_unk:
-            X2 = self.X_train[np.in1d(self.y_train, self.unk_train_classes)]
-            y2 = self.y_train[np.in1d(self.y_train, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
-
-    def test(self, with_out=False, with_unk=False):
-        X = self.X_test[np.in1d(self.y_test, self.in_train_classes)]
-        y = self.y_test[np.in1d(self.y_test, self.in_train_classes)]
-
-        if with_out:
-            X2 = self.X_test[np.in1d(self.y_test, self.out_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.out_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        if with_unk:
-            X2 = self.X_test[np.in1d(self.y_test, self.unk_train_classes)]
-            y2 = self.y_test[np.in1d(self.y_test, self.unk_train_classes)]
-
-            X = np.concatenate((X, X2), axis=0)
-            y = np.concatenate((y, X2), axis=0)
-
-        return X, y
+        split = 40000
+        self.X_train, self.y_train = X_train[idxs][:split], y_train[idxs][:split]
+        self.X_val, self.y_val = X_train[idxs][split:], y_train[idxs][split:]
+        self.X_test, self.y_test = X_test, y_test
 
 
 def load(dataset):
