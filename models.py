@@ -125,28 +125,48 @@ class CNN(Model):
         self.batch_size = batch_size
 
         model = Sequential()
-        model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
+        model.add(Activation('relu'))
+        model.add(Conv2D(32, (3, 3)))
+        model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.25))
+        model.add(Conv2D(64, (3, 3), padding='same'))
+        model.add(Activation('relu'))
+        model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+        model.add(Dropout(0.25))
         model.add(Flatten())
-        model.add(Dense(128, activation='relu'))
+        model.add(Dense(512))
+        model.add(Activation('relu'))
         model.add(Dropout(0.5))
-        model.add(Dense(num_classes, activation='softmax'))
+        model.add(Dense(num_classes))
+        model.add(Activation('softmax'))
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.model = model
 
-        proba_model = Sequential()
-        proba_model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-        proba_model.add(Conv2D(64, (3, 3), activation='relu'))
-        proba_model.add(MaxPooling2D(pool_size=(2, 2)))
-        proba_model.add(BayesianDropout(0.5))
-        proba_model.add(Flatten())
-        proba_model.add(Dense(128, activation='relu'))
-        proba_model.add(BayesianDropout(0.5))
-        proba_model.add(Dense(num_classes, activation='softmax'))
-        proba_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        self.proba_model = proba_model
+        probabilistic_model = Sequential()
+        probabilistic_model.add(Conv2D(32, (3, 3), padding='same', input_shape=input_shape))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(Conv2D(32, (3, 3)))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
+        probabilistic_model.add(BayesianDropout(0.25))
+        probabilistic_model.add(Conv2D(64, (3, 3), padding='same'))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(Conv2D(64, (3, 3)))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
+        probabilistic_model.add(BayesianDropout(0.25))
+        probabilistic_model.add(Flatten())
+        probabilistic_model.add(Dense(512))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(BayesianDropout(0.5))
+        probabilistic_model.add(Dense(num_classes))
+        probabilistic_model.add(Activation('softmax'))
+        probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        self.probabilistic_model = probabilistic_model
 
     def fit(self, X_train, y_train, X_val, y_val):
         es = EarlyStopping(monitor='val_loss', patience=10)
@@ -158,14 +178,14 @@ class CNN(Model):
                        validation_data=(X_val, y_val),
                        callbacks=[cp, es])
         self.model.load_weights('runs/weights.hdf5')
-        self.proba_model.set_weights(self.model.get_weights())
+        self.probabilistic_model.set_weights(self.model.get_weights())
 
         return self
 
     def predict_proba(self, X, probabilistic=False):
         model = self.model
         if probabilistic:
-            model = self.proba_model
+            model = self.probabilistic_model
 
         return model.predict(X, batch_size=self.batch_size, verbose=0)
 
