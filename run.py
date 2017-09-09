@@ -85,7 +85,8 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
     ]
 
-    X = np.zeros([len(X_val), len(uncertainties)])
+    X = np.zeros([len(X_val), len(uncertainties) + dataset.num_classes])
+    X[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
     y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
     for i, (name, func, y_score) in enumerate(uncertainties):
         _, uncertainty = func(y_score)
@@ -116,7 +117,8 @@ def evaluate(model, dataset, posterior_samples, _log):
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
     ]
 
-    X_pred_uncertainty = np.zeros([len(X_test), len(uncertainties)])
+    X_pred_uncertainty = np.zeros([len(X_test), len(uncertainties) + dataset.num_classes])
+    X_pred_uncertainty[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
     for i, (name, func, y_score) in enumerate(uncertainties):
         y_hat, uncertainty = func(y_score)
         l = np.array(sorted(zip(uncertainty, y_test, y_hat)))
