@@ -181,7 +181,7 @@ class CNN(Model):
                        epochs=self.epochs,
                        batch_size=self.batch_size,
                        validation_data=(X_val, y_val),
-                       callbacks=[cp])
+                       callbacks=[cp, es])
         self.model.load_weights(weights_filename)
         self.probabilistic_model.set_weights(self.model.get_weights())
 
