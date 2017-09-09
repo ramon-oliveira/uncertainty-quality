@@ -12,6 +12,7 @@ import datasets
 import models
 import tqdm
 from scipy.stats import entropy
+from sklearn.linear_model import LogisticRegression
 
 ex = Experiment('uncertainty-quality')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
@@ -69,6 +70,30 @@ def uncertainty_entropy(y_deterministic):
     return y_pred, y_entropy
 
 
+def uncertainty_classifer(model, dataset, X_pred_uncertainty):
+    X_val, y_val = dataset.validation_data
+
+    y_deterministic = model.predict_proba(X_val, probabilistic=False)
+    y_probabilistic = [model.predict_proba(X_val, probabilistic=True)
+                       for i in range(posterior_samples)]
+
+    uncertainties = [
+        ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
+        ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
+        ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
+    ]
+
+    X = np.zeros(size=[len(X_val), len(uncertainties)])
+    y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
+    for i, (name, func, y_score) in enumerate(uncertainties):
+        _, uncertainty = func(y_score)
+        X[:, i] = uncertainty
+
+    lr = LogisticRegression().fit(X, y)
+    return lr.predict_proba(X_pred_uncertainty)
+
+
+
 @ex.capture
 def evaluate(model, dataset, posterior_samples, _log):
     X_test, y_test = dataset.test_data
@@ -89,15 +114,27 @@ def evaluate(model, dataset, posterior_samples, _log):
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
     ]
 
-    for name, func, y_score in tqdm.tqdm(uncertainties, desc='evaluating'):
-        y_pred, uncertainty = func(y_score)
-        l = np.array(sorted(zip(uncertainty, y_test, y_pred)))
+    X_pred_uncertainty = np.zeros(size=[len(X_test), len(uncertainties)])
+    for i, (name, func, y_score) in enumerate(uncertainties):
+        y_hat, uncertainty = func(y_score)
+        l = np.array(sorted(zip(uncertainty, y_test, y_hat)))
         prop_acc = []
-        for end in range(50, len(y_pred), 20):
-            prop = end/len(y_pred)
+        for end in range(50, len(y_hat), 20):
+            prop = end/len(y_hat)
             acc = (l[:end, 1] == l[:end, 2]).mean()
             prop_acc.append([prop, acc])
         ex.info[name] = prop_acc
+
+        X_pred_uncertainty[:, i] = uncertainty
+
+    uncertainty = uncertainty_classifer(model, dataset, X_pred_uncertainty)
+    l = np.array(sorted(zip(uncertainty, y_test, y_pred)))
+    prop_acc = []
+    for end in range(50, len(y_pred), 20):
+        prop = end/len(y_pred)
+        acc = (l[:end, 1] == l[:end, 2]).mean()
+        prop_acc.append([prop, acc])
+    ex.info['uncertainty_classifer'] = prop_acc
 
 
 @ex.automain
