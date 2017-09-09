@@ -70,12 +70,14 @@ def uncertainty_entropy(y_deterministic):
     return y_pred, y_entropy
 
 
-def uncertainty_classifer(model, dataset, X_pred_uncertainty):
+@ex.capture
+def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples):
     X_val, y_val = dataset.validation_data
 
     y_deterministic = model.predict_proba(X_val, probabilistic=False)
     y_probabilistic = [model.predict_proba(X_val, probabilistic=True)
                        for i in range(posterior_samples)]
+    y_probabilistic = np.array(y_probabilistic)
 
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
@@ -83,14 +85,14 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty):
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
     ]
 
-    X = np.zeros(size=[len(X_val), len(uncertainties)])
+    X = np.zeros([len(X_val), len(uncertainties)])
     y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
     for i, (name, func, y_score) in enumerate(uncertainties):
         _, uncertainty = func(y_score)
         X[:, i] = uncertainty
 
     lr = LogisticRegression().fit(X, y)
-    return lr.predict_proba(X_pred_uncertainty)
+    return lr.predict_proba(X_pred_uncertainty)[:, 1]
 
 
 
@@ -114,7 +116,7 @@ def evaluate(model, dataset, posterior_samples, _log):
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
     ]
 
-    X_pred_uncertainty = np.zeros(size=[len(X_test), len(uncertainties)])
+    X_pred_uncertainty = np.zeros([len(X_test), len(uncertainties)])
     for i, (name, func, y_score) in enumerate(uncertainties):
         y_hat, uncertainty = func(y_score)
         l = np.array(sorted(zip(uncertainty, y_test, y_hat)))
