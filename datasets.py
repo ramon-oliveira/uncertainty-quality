@@ -3,6 +3,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from keras.datasets import mnist
 from keras.datasets import cifar10
+import keras.backend as K
 
 
 class Dataset(object):
@@ -63,6 +64,16 @@ class MNIST(Dataset):
         (X_train, y_train), (X_test, y_test) = mnist.load_data()
         X_train = X_train/128
         X_test = X_test/128
+
+        if K.image_data_format() == 'channels_first':
+            X_train = X_train.reshape(X_train.shape[0], 1, 28, 28)
+            X_test = X_test.reshape(X_test.shape[0], 1, 28, 28)
+            input_shape = (1, 28, 28)
+        else:
+            X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
+            X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
+            input_shape = (28, 28, 1)
+
         y_train = y_train.ravel()
         y_test = y_test.ravel()
         idxs = np.arange(X_train.shape[0])
@@ -82,6 +93,7 @@ class CIFAR10(Dataset):
         (X_train, y_train), (X_test, y_test) = cifar10.load_data()
         X_train = X_train/128
         X_test = X_test/128
+
         y_train = y_train.ravel()
         y_test = y_test.ravel()
         idxs = np.arange(X_train.shape[0])
