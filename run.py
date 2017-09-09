@@ -1,3 +1,4 @@
+import xgboost as xgb
 import tensorflow as tf
 from keras.backend.tensorflow_backend import set_session
 config = tf.ConfigProto()
@@ -37,13 +38,14 @@ def cfg():
 
 @ex.capture
 def train(model, dataset):
-    X_train, y_train = dataset.train_data
-    y_train = np.eye(dataset.num_classes)[y_train.ravel()]
-    X_val, y_val = dataset.validation_data
-    y_val = np.eye(dataset.num_classes)[y_val.ravel()]
+    # X_train, y_train = dataset.train_data
+    # y_train = np.eye(dataset.num_classes)[y_train.ravel()]
+    # X_val, y_val = dataset.validation_data
+    # y_val = np.eye(dataset.num_classes)[y_val.ravel()]
+    # model.fit(X_train, y_train, X_val, y_val)
 
-    model.fit(X_train, y_train, X_val, y_val)
-
+    model.model.load_weights('runs/5e7954645601424ca829d5ea98f6bc87.hdf5')
+    model.probabilistic_model.load_weights('runs/5e7954645601424ca829d5ea98f6bc87.hdf5')
 
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
@@ -92,8 +94,8 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
         _, uncertainty = func(y_score)
         X[:, i] = uncertainty
 
-    lr = LogisticRegression().fit(X, y)
-    return lr.predict_proba(X_pred_uncertainty)[:, 1]
+    clf = xgb.XGBClassifier().fit(X, y)
+    return clf.predict_proba(X_pred_uncertainty)[:, 1]
 
 
 
