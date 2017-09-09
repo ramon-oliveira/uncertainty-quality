@@ -3,6 +3,7 @@ import numpy as np
 import tensorflow as tf
 import edward as ed
 import tqdm
+import uuid
 from edward.models import Normal, Categorical, Multinomial
 from keras.models import Sequential
 from keras import optimizers
@@ -173,14 +174,15 @@ class CNN(Model):
 
     def fit(self, X_train, y_train, X_val, y_val):
         es = EarlyStopping(monitor='val_loss', patience=10)
-        cp = ModelCheckpoint('runs/weights.hdf5', save_best_only=True)
+        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
+        cp = ModelCheckpoint(weights_filename, save_best_only=True)
 
         self.model.fit(X_train, y_train,
                        epochs=self.epochs,
                        batch_size=self.batch_size,
                        validation_data=(X_val, y_val),
                        callbacks=[cp])
-        self.model.load_weights('runs/weights.hdf5')
+        self.model.load_weights(weights_filename)
         self.probabilistic_model.set_weights(self.model.get_weights())
 
         return self
