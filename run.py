@@ -60,14 +60,25 @@ def uncertainty_std_mean(y_probabilistic):
     return y_pred, y_std_mean
 
 
-def uncertainty_entropy(y_deterministic):
+def uncertainty_entropy(y_score):
     y_entropy = []
-    for y in y_deterministic:
+    for y in y_score:
         y_entropy.append(entropy(y))
     y_entropy = np.array(y_entropy)
-    y_pred = y_deterministic.argmax(axis=1)
+    y_pred = y_score.argmax(axis=1)
 
     return y_pred, y_entropy
+
+
+def uncertainty_mean_entropy(y_probabilistic):
+    y_entropy = []
+    for y_score_sample in y_probabilistic:
+        _, uncertainty = uncertainty_entropy(y_score_sample)
+        y_entropy.append(uncertainty)
+    y_mean_entropy = np.array(y_entropy).mean(axis=0)
+    y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
+
+    return y_pred, y_mean_entropy
 
 
 @ex.capture
@@ -83,6 +94,8 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
+        ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
+        ('uncertainty_mean_entropy', uncertainty_mean_entropy, y_probabilistic),
     ]
 
     X = np.zeros([len(X_val), len(uncertainties) + dataset.num_classes])
@@ -115,6 +128,8 @@ def evaluate(model, dataset, posterior_samples, _log):
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
+        ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
+        ('uncertainty_mean_entropy', uncertainty_mean_entropy, y_probabilistic),
     ]
 
     X_pred_uncertainty = np.zeros([len(X_test), len(uncertainties) + dataset.num_classes])
