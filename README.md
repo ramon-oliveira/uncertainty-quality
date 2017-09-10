@@ -1,10 +1,30 @@
 # Uncertainty Quality
 
+Experiments repositoy for Uncertainty quality paper
 
-Fatores de variação:
-1) MNIST, CIFAR10, Retinopatia, Melanoma*
-2) Dropout, ML, VI, SGHMC*
-3) MLP -> MNIST, CNN -> Others
+## Variation factors:
+1) Datasets:
+    - MNIST
+    - CIFAR10
+    - Retinopathy
+    - Melanoma*
+2) Inference:
+    - Maximum Likelihood (?)
+    - Dropout
+    - VI
+    - SGHMC*
+
+
+## Uncertainty metrics:
+    - Entropy
+    - Entropy mean
+    - Mean entropy
+    - Standard deviation (from mean score argmax)
+    - Standard deviation mean (from all class)
+    - Classifier
+        - Uses all previous uncertainties as features
+        - Plus the mean score for all classes
+        - XGBClassifier
 
 # Applications
 
