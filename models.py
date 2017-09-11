@@ -1,4 +1,3 @@
-from abc import ABC, abstractmethod
 import numpy as np
 import tensorflow as tf
 import edward as ed
@@ -20,6 +19,40 @@ from layers import BayesianDropout
 from keras import backend as K
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
+
+
+class BaseModel(object):
+
+    def fit(self, dataset):
+        es = EarlyStopping(monitor='val_loss', patience=10)
+        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
+        cp = ModelCheckpoint(weights_filename, save_best_only=True)
+
+        self.model.fit_generator(
+            generator=dataset.train_generator,
+            validation_data=dataset.validation_generator,
+            steps_per_epoch=dataset.train_samples//self.batch_size,
+            validation_steps=dataset.validation_samples//self.batch_size,
+            epochs=self.epochs,
+            workers=4,
+            callbacks=[cp, es],
+        )
+
+        self.model.load_weights(weights_filename)
+        self.probabilistic_model.set_weights(self.model.get_weights())
+
+        return self
+
+    def predict(self, gen, samples, probabilistic=False):
+        if probabilistic:
+            model = self.probabilistic_model
+        else:
+            model = self.model
+        return model.predict_generator(
+            generator=gen,
+            steps=samples//self.batch_size,
+            workers=4,
+        )
 
 
 class LogisticRegression(object):
@@ -103,7 +136,7 @@ class MLP(object):
         return self.predict_proba(X).argmax(axis=1)
 
 
-class CNN(object):
+class CNN(BaseModel):
 
     def __init__(self, input_shape, num_classes, epochs=10, batch_size=32):
         self.input_shape = input_shape
@@ -155,35 +188,8 @@ class CNN(object):
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
-    def fit(self, X_train, y_train, X_val, y_val):
-        es = EarlyStopping(monitor='val_loss', patience=10)
-        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
-        cp = ModelCheckpoint(weights_filename, save_best_only=True)
 
-        self.model.fit(X_train, y_train,
-                       epochs=self.epochs,
-                       batch_size=self.batch_size,
-                       validation_data=(X_val, y_val),
-                       callbacks=[cp, es])
-        self.model.load_weights(weights_filename)
-        self.probabilistic_model.set_weights(self.model.get_weights())
-
-        return self
-
-    def predict_proba(self, X, probabilistic=False):
-        model = self.model
-        if probabilistic:
-            model = self.probabilistic_model
-
-        return model.predict(X, batch_size=self.batch_size, verbose=0)
-
-    def predict(self, X, probabilistic=False):
-        y = self.predict_proba(X, probabilistic)
-        return y.argmax(axis=1)
-
-
-
-class VGG(object):
+class VGG(BaseModel):
 
     def __init__(self, input_shape, num_classes, epochs=10, batch_size=32):
         self.input_shape = input_shape
@@ -210,37 +216,6 @@ class VGG(object):
         x = Dense(num_classes, activation='softmax', name='predictions')(x)
         self.probabilistic_model = Model(inputs=probabilistic_model.input, outputs=x)
         self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    def fit(self, dataset):
-        # es = EarlyStopping(monitor='val_loss', patience=10)
-        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
-        cp = ModelCheckpoint(weights_filename, save_best_only=True)
-
-        self.model.fit_generator(
-            generator=dataset.train_generator,
-            validation_data=dataset.validation_generator,
-            steps_per_epoch=2000//self.batch_size,
-            validation_steps=190//self.batch_size,
-            epochs=self.epochs,
-            workers=6,
-            callbacks=[cp],
-        )
-
-        self.model.load_weights(weights_filename)
-        self.probabilistic_model.set_weights(self.model.get_weights())
-
-        return self
-
-    def predict_proba(self, X, probabilistic=False):
-        model = self.model
-        if probabilistic:
-            model = self.probabilistic_model
-
-        return model.predict(X, batch_size=self.batch_size, verbose=0)
-
-    def predict(self, X, probabilistic=False):
-        y = self.predict_proba(X, probabilistic)
-        return y.argmax(axis=1)
 
 
 def load(settings):
