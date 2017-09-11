@@ -26,7 +26,23 @@ Experiments repositoy for Uncertainty quality paper
         - Plus the mean score for all classes
         - XGBClassifier
 
+
+## TODO:
+    - Fix test data generators
+        - Check test accuracy
+    - Variational Inference MLP
+
 # Applications
 
-- http://www.biorxiv.org/content/early/2016/10/28/084210
-- https://arxiv.org/abs/1708.08843
+- [Leveraging uncertainty information from deep neural networks for disease detection](http://www.biorxiv.org/content/early/2016/10/28/084210)
+    - Inappropriate baseline
+    - Comparation against random split
+- [Uncertainties in parameters estimated with neural networks: application to strong gravitational lensing](https://arxiv.org/abs/1708.08843)
+    - Comparation against itself
+    - No baseline
+- [Modelling Uncertainty in Deep Learning for Camera Relocalization](https://arxiv.org/pdf/1509.05909.pdf)
+>>> **A non-Bayesian system which
+outputs point estimates does not interpret if the model is
+making sensible predictions or just guessing at random.**
+By measuring uncertainty we can understand with what
+confidence we can trust the prediction.

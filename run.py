@@ -114,7 +114,7 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
 def evaluate(model, dataset, posterior_samples, _log):
     y_test = []
     for _, y in dataset.test_generator:
-        y_test.extend(y.argmax(axis=1))
+        y_test.extend(y.argmax(axis=1).tolist())
         if len(y_test) >= dataset.test_samples: break
     y_test = np.array(y_test)
 
@@ -128,6 +128,9 @@ def evaluate(model, dataset, posterior_samples, _log):
     y_probabilistic = np.array(y_probabilistic)
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
 
+    print(len(y_test), len(y_pred))
+    print(y_test[:10])
+    print(y_pred[:10])
     acc_test = (y_test.ravel() == y_pred.ravel()).mean()
     ex.info['accuracy_test'] = acc_test
     _log.info('test accuracy: {0:.2f}'.format(acc_test))
