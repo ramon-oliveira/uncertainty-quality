@@ -5,8 +5,7 @@ import edward as ed
 import tqdm
 import uuid
 from edward.models import Normal, Categorical, Multinomial
-from keras.models import Sequential
-from keras import optimizers
+from keras.models import Sequential, Model
 from keras.layers import Dense
 from keras.layers import Activation
 from keras.layers import Dropout
@@ -14,6 +13,7 @@ from keras.layers import Lambda
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
+from keras.applications.vgg16 import VGG16
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
 from layers import BayesianDropout
@@ -22,22 +22,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
 
 
-class Model(ABC):
-
-    @abstractmethod
-    def fit(X, y):
-        pass
-
-    @abstractmethod
-    def predict_proba(X):
-        pass
-
-    @abstractmethod
-    def predict(X):
-        pass
-
-
-class LogisticRegression(Model):
+class LogisticRegression(object):
 
     def __init__(self, n_samples=5, n_iter=100, inference='variational'):
         self.inference = inference
@@ -77,7 +62,7 @@ class LogisticRegression(Model):
         return self.predict_proba(X).argmax(axis=1)
 
 
-class MLP(Model):
+class MLP(object):
 
     def __init__(self, epochs=10, batch_size=32, inference='dropout'):
         self.epochs = epochs
@@ -118,7 +103,7 @@ class MLP(Model):
         return self.predict_proba(X).argmax(axis=1)
 
 
-class CNN(Model):
+class CNN(object):
 
     def __init__(self, input_shape, num_classes, epochs=10, batch_size=32):
         self.input_shape = input_shape
@@ -145,8 +130,7 @@ class CNN(Model):
         model.add(Dropout(0.5))
         model.add(Dense(num_classes))
         model.add(Activation('softmax'))
-        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
-        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.model = model
 
         probabilistic_model = Sequential()
@@ -168,8 +152,7 @@ class CNN(Model):
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(num_classes))
         probabilistic_model.add(Activation('softmax'))
-        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
-        probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
     def fit(self, X_train, y_train, X_val, y_val):
@@ -199,16 +182,79 @@ class CNN(Model):
         return y.argmax(axis=1)
 
 
-def load(model):
-    name = model.pop('name')
+
+class VGG(object):
+
+    def __init__(self, input_shape, num_classes, epochs=10, batch_size=32):
+        self.input_shape = input_shape
+        self.num_classes = num_classes
+        self.epochs = epochs
+        self.batch_size = batch_size
+
+        model = VGG16(include_top=False, input_shape=input_shape)
+        x = Flatten(name='flatten')(model.output)
+        x = Dense(512, activation='relu', name='fc1')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(512, activation='relu', name='fc2')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(num_classes, activation='softmax', name='predictions')(x)
+        self.model = Model(inputs=model.input, outputs=x)
+        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+        probabilistic_model = VGG16(include_top=False, input_shape=input_shape)
+        x = Flatten(name='flatten')(probabilistic_model.output)
+        x = Dense(512, activation='relu', name='fc1')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(512, activation='relu', name='fc2')(x)
+        x = Dropout(0.5)(x)
+        x = Dense(num_classes, activation='softmax', name='predictions')(x)
+        self.probabilistic_model = Model(inputs=probabilistic_model.input, outputs=x)
+        self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    def fit(self, dataset):
+        # es = EarlyStopping(monitor='val_loss', patience=10)
+        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
+        cp = ModelCheckpoint(weights_filename, save_best_only=True)
+
+        self.model.fit_generator(
+            generator=dataset.train_generator,
+            validation_data=dataset.validation_generator,
+            steps_per_epoch=2000//self.batch_size,
+            validation_steps=190//self.batch_size,
+            epochs=self.epochs,
+            workers=6,
+            callbacks=[cp],
+        )
+
+        self.model.load_weights(weights_filename)
+        self.probabilistic_model.set_weights(self.model.get_weights())
+
+        return self
+
+    def predict_proba(self, X, probabilistic=False):
+        model = self.model
+        if probabilistic:
+            model = self.probabilistic_model
+
+        return model.predict(X, batch_size=self.batch_size, verbose=0)
+
+    def predict(self, X, probabilistic=False):
+        y = self.predict_proba(X, probabilistic)
+        return y.argmax(axis=1)
+
+
+def load(settings):
+    name = settings.pop('name')
 
     if name == 'logistic_regression':
-        model = LogisticRegression(**model)
+        model = LogisticRegression(**settings)
     elif name == 'mlp':
-        model = MLP(**model)
+        model = MLP(**settings)
     elif name == 'cnn':
-        model = CNN(**model)
+        model = CNN(**settings)
+    elif name == 'vgg':
+        model = VGG(**settings)
     else:
-        raise Exception('Unknown model {0}'.format(model))
+        raise Exception('Unknown model {0}'.format(name))
 
     return model

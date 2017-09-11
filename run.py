@@ -1,10 +1,3 @@
-import xgboost as xgb
-import tensorflow as tf
-from keras.backend.tensorflow_backend import set_session
-config = tf.ConfigProto()
-config.gpu_options.per_process_gpu_memory_fraction = 0.5
-set_session(tf.Session(config=config))
-
 import numpy as np
 from sacred import Experiment
 from sacred.observers import FileStorageObserver
@@ -23,13 +16,16 @@ ex.observers.append(FileStorageObserver.create('runs/'))
 @ex.config
 def cfg():
     seed = 1337
+    batch_size = 8
 
     dataset_settings = {
-        'name': 'cifar10',
+        'name': 'melanoma',
+        'batch_size': batch_size,
     }
 
     model_settings = {
-        'name': 'cnn',
+        'name': 'vgg',
+        'batch_size': batch_size,
         'epochs': 100,
     }
 
@@ -38,11 +34,12 @@ def cfg():
 
 @ex.capture
 def train(model, dataset):
-    X_train, y_train = dataset.train_data
-    y_train = np.eye(dataset.num_classes)[y_train.ravel()]
-    X_val, y_val = dataset.validation_data
-    y_val = np.eye(dataset.num_classes)[y_val.ravel()]
-    model.fit(X_train, y_train, X_val, y_val)
+    # X_train, y_train = dataset.train_data
+    # y_train = np.eye(dataset.num_classes)[y_train.ravel()]
+    # X_val, y_val = dataset.validation_data
+    # y_val = np.eye(dataset.num_classes)[y_val.ravel()]
+    # model.fit(X_train, y_train, X_val, y_val)
+    model.fit(dataset)
 
 
 def uncertainty_std_argmax(y_probabilistic):

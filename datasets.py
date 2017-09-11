@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
+from keras.preprocessing.image import ImageDataGenerator
 from keras.datasets import mnist
 from keras.datasets import cifar10
 import keras.backend as K
@@ -24,14 +25,6 @@ class Dataset(object):
     @property
     def test_data(self):
         return self.X_test, self.y_test
-
-    @property
-    def input_shape(self):
-        return self.X_train.shape[1:]
-
-    @property
-    def num_classes(self):
-        return len(np.unique(self.y_train))
 
 
 class Digits(Dataset):
@@ -68,11 +61,11 @@ class MNIST(Dataset):
         if K.image_data_format() == 'channels_first':
             X_train = X_train.reshape(X_train.shape[0], 1, 28, 28)
             X_test = X_test.reshape(X_test.shape[0], 1, 28, 28)
-            input_shape = (1, 28, 28)
+            self.input_shape = (1, 28, 28)
         else:
             X_train = X_train.reshape(X_train.shape[0], 28, 28, 1)
             X_test = X_test.reshape(X_test.shape[0], 28, 28, 1)
-            input_shape = (28, 28, 1)
+            self.input_shape = (28, 28, 1)
 
         y_train = y_train.ravel()
         y_test = y_test.ravel()
@@ -105,16 +98,60 @@ class CIFAR10(Dataset):
         self.X_test, self.y_test = X_test, y_test
 
 
-def load(dataset):
-    name = dataset.pop('name')
+
+class Melanoma(Dataset):
+
+    def __init__(self, batch_size, *args, **kwargs):
+        super(Melanoma, self).__init__(*args, **kwargs)
+        self.num_classes = 2
+
+        if K.image_data_format() == 'channels_first':
+            self.input_shape = (3, 224, 224)
+        else:
+            self.input_shape = (224, 224, 3)
+
+        self.data_generator = ImageDataGenerator(
+            rescale=1/255,
+            width_shift_range=0.1,
+            height_shift_range=0.1,
+            horizontal_flip=True,
+            vertical_flip=True,
+        )
+
+        self.train_generator = self.data_generator.flow_from_directory(
+            directory='data/melanoma/train',
+            target_size=(224, 224),
+            batch_size=batch_size,
+            class_mode='categorical',
+        )
+
+        self.validation_generator = self.data_generator.flow_from_directory(
+            directory='data/melanoma/validation',
+            target_size=(224, 224),
+            batch_size=batch_size,
+            class_mode='categorical',
+        )
+
+        self.validation_generator = self.data_generator.flow_from_directory(
+            directory='data/melanoma/test',
+            target_size=(224, 224),
+            batch_size=batch_size,
+            class_mode='categorical',
+        )
+
+
+def load(settings):
+    name = settings.pop('name')
 
     if name == 'digits':
-        dataset = Digits(**dataset)
+        dataset = Digits(**settings)
     elif name == 'mnist':
-        dataset = MNIST(**dataset)
+        dataset = MNIST(**settings)
     elif name == 'cifar10':
-        dataset = CIFAR10(**dataset)
+        dataset = CIFAR10(**settings)
+    elif name == 'melanoma':
+        dataset = Melanoma(**settings)
     else:
-        raise Exception('Unknown dataset {0}'.format(dataset))
+        raise Exception('Unknown dataset {0}'.format(name))
 
     return dataset
