@@ -1,0 +1,108 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/uncertainty-quality",
+    "dependencies": [
+      "keras==2.0.5",
+      "numpy==1.12.1",
+      "sacred==0.7b3",
+      "scipy==0.19.0",
+      "sklearn==0.18.2",
+      "tensorflow==1.0.1",
+      "tqdm==4.11.2",
+      "xgboost==0.6"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [
+      {
+        "commit": "632fd9c6bb9141c082df7b58d68724ab26c14c90",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "632fd9c6bb9141c082df7b58d68724ab26c14c90",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "632fd9c6bb9141c082df7b58d68724ab26c14c90",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      }
+    ],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_1cd80aabbebcf4a364ab645968e11bd2.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_b29528edacedc6c6b78932c175573a39.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_31c8123276ac33d6f0855fcb549e208d.py"
+      ]
+    ]
+  },
+  "heartbeat": "2017-09-10T00:32:47.719546",
+  "host": {
+    "cpu": "Intel(R) Core(TM) i7-4820K CPU @ 3.70GHz",
+    "gpus": {
+      "driver_version": "361.93.02",
+      "gpus": [
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4041
+        },
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4043
+        }
+      ]
+    },
+    "hostname": "dl-01",
+    "os": [
+      "Linux",
+      "Linux-3.13.0-107-generic-x86_64-with-debian-jessie-sid"
+    ],
+    "python_version": "3.6.1"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "dataset_settings.name=mnist"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2017-09-10T00:20:50.215875",
+  "status": "COMPLETED",
+  "stop_time": "2017-09-10T00:32:47.212652"
+}

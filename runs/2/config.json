@@ -1,0 +1,11 @@
+{
+  "dataset_settings": {
+    "name": "cifar10"
+  },
+  "model_settings": {
+    "epochs": 100,
+    "name": "cnn"
+  },
+  "posterior_samples": 50,
+  "seed": 1337
+}
