@@ -30,16 +30,7 @@ class MNIST(Dataset):
         self.num_classes = 10
 
         split = 50000
-        data_generator = ImageDataGenerator(
-            rescale=1/255,
-            # rotation_range=40,
-            # width_shift_range=0.2,
-            # height_shift_range=0.2,
-            # shear_range=0.2,
-            # zoom_range=0.2,
-            # horizontal_flip=True,
-            # fill_mode='nearest',
-        )
+        data_generator = ImageDataGenerator(rescale=1/255)
 
         self.train_samples = split
         self.train_generator = data_generator.flow(
@@ -48,19 +39,21 @@ class MNIST(Dataset):
             batch_size=self.batch_size,
         )
 
+        data_generator = ImageDataGenerator(rescale=1/255)
         self.validation_samples = len(X_train) - split
         self.validation_generator = data_generator.flow(
             x=X_train[split:],
             y=np.eye(self.num_classes)[y_train[split:].ravel()],
             batch_size=self.batch_size,
+            shuffle=False,
         )
 
-        data_generator = ImageDataGenerator(rescale=1/255)
         self.test_samples = len(X_test)
         self.test_generator = data_generator.flow(
             x=X_test,
             y=np.eye(self.num_classes)[y_test.ravel()],
             batch_size=self.batch_size,
+            shuffle=False,
         )
 
 
@@ -90,19 +83,21 @@ class CIFAR10(Dataset):
             batch_size=self.batch_size,
         )
 
+        data_generator = ImageDataGenerator(rescale=1/255)
         self.validation_samples = len(X_train) - split
         self.validation_generator = data_generator.flow(
             x=X_train[split:],
             y=np.eye(self.num_classes)[y_train[split:].ravel()],
             batch_size=self.batch_size,
+            shuffle=False,
         )
 
-        data_generator = ImageDataGenerator(rescale=1/255)
         self.test_samples = len(X_test)
         self.test_generator = data_generator.flow(
             x=X_test,
             y=np.eye(self.num_classes)[y_test.ravel()],
             batch_size=self.batch_size,
+            shuffle=False,
         )
 
 
@@ -136,12 +131,14 @@ class Melanoma(Dataset):
             class_mode='categorical',
         )
 
+        data_generator = ImageDataGenerator(rescale=1/255)
         self.validation_samples = 189
         self.validation_generator = data_generator.flow_from_directory(
             directory='data/melanoma/validation',
             target_size=(224, 224),
             batch_size=self.batch_size,
             class_mode='categorical',
+            shuffle=False,
         )
 
         self.test_samples = 600
@@ -150,6 +147,7 @@ class Melanoma(Dataset):
             target_size=(224, 224),
             batch_size=self.batch_size,
             class_mode='categorical',
+            shuffle=False,
         )
 
 
