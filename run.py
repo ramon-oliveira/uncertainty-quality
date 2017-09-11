@@ -1,3 +1,4 @@
+import xgboost as xgb
 import numpy as np
 from sacred import Experiment
 from sacred.observers import FileStorageObserver
@@ -16,29 +17,24 @@ ex.observers.append(FileStorageObserver.create('runs/'))
 @ex.config
 def cfg():
     seed = 1337
-    batch_size = 8
+    epochs = 100
+    batch_size = 100
+    posterior_samples = 50
 
     dataset_settings = {
-        'name': 'melanoma',
+        'name': 'mnist',
         'batch_size': batch_size,
     }
 
     model_settings = {
-        'name': 'vgg',
+        'name': 'cnn',
         'batch_size': batch_size,
-        'epochs': 100,
+        'epochs': epochs,
     }
-
-    posterior_samples = 50
 
 
 @ex.capture
 def train(model, dataset):
-    # X_train, y_train = dataset.train_data
-    # y_train = np.eye(dataset.num_classes)[y_train.ravel()]
-    # X_val, y_val = dataset.validation_data
-    # y_val = np.eye(dataset.num_classes)[y_val.ravel()]
-    # model.fit(X_train, y_train, X_val, y_val)
     model.fit(dataset)
 
 
@@ -80,11 +76,19 @@ def uncertainty_mean_entropy(y_probabilistic):
 
 @ex.capture
 def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples):
-    X_val, y_val = dataset.validation_data
+    y_val = []
+    for _, y in dataset.validation_generator:
+        y_val.extend(y.argmax(axis=1))
+        if len(y_val) >= dataset.validation_samples: break
+    y_val = np.array(y_val)
 
-    y_deterministic = model.predict_proba(X_val, probabilistic=False)
-    y_probabilistic = [model.predict_proba(X_val, probabilistic=True)
-                       for i in range(posterior_samples)]
+    y_deterministic = model.predict(gen=dataset.validation_generator,
+                                    samples=dataset.validation_samples,
+                                    probabilistic=False)
+    y_probabilistic = [model.predict(gen=dataset.validation_generator,
+                                     samples=dataset.validation_samples,
+                                     probabilistic=True)
+                       for i in tqdm.trange(posterior_samples, desc='sampling validation')]
     y_probabilistic = np.array(y_probabilistic)
 
     uncertainties = [
@@ -95,7 +99,7 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
         ('uncertainty_mean_entropy', uncertainty_mean_entropy, y_probabilistic),
     ]
 
-    X = np.zeros([len(X_val), len(uncertainties) + dataset.num_classes])
+    X = np.zeros([len(y_val), len(uncertainties) + dataset.num_classes])
     X[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
     y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
     for i, (name, func, y_score) in enumerate(uncertainties):
@@ -106,18 +110,25 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
     return clf.predict_proba(X_pred_uncertainty)[:, 1]
 
 
-
 @ex.capture
 def evaluate(model, dataset, posterior_samples, _log):
-    X_test, y_test = dataset.test_data
+    y_test = []
+    for _, y in dataset.test_generator:
+        y_test.extend(y.argmax(axis=1))
+        if len(y_test) >= dataset.test_samples: break
+    y_test = np.array(y_test)
 
-    y_deterministic = model.predict_proba(X_test, probabilistic=False)
-    y_probabilistic = [model.predict_proba(X_test, probabilistic=True)
+    y_deterministic = model.predict(gen=dataset.test_generator,
+                                    samples=dataset.test_samples,
+                                    probabilistic=False)
+    y_probabilistic = [model.predict(gen=dataset.test_generator,
+                                     samples=dataset.test_samples,
+                                     probabilistic=True)
                        for i in tqdm.trange(posterior_samples, desc='sampling')]
     y_probabilistic = np.array(y_probabilistic)
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
 
-    acc_test = (y_test == y_pred).mean()
+    acc_test = (y_test.ravel() == y_pred.ravel()).mean()
     ex.info['accuracy_test'] = acc_test
     _log.info('test accuracy: {0:.2f}'.format(acc_test))
 
@@ -129,7 +140,7 @@ def evaluate(model, dataset, posterior_samples, _log):
         ('uncertainty_mean_entropy', uncertainty_mean_entropy, y_probabilistic),
     ]
 
-    X_pred_uncertainty = np.zeros([len(X_test), len(uncertainties) + dataset.num_classes])
+    X_pred_uncertainty = np.zeros([len(y_test), len(uncertainties) + dataset.num_classes])
     X_pred_uncertainty[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
     for i, (name, func, y_score) in enumerate(uncertainties):
         y_hat, uncertainty = func(y_score)
