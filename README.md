@@ -2,6 +2,10 @@
 
 Experiments repositoy for Uncertainty quality paper
 
+## Contributions
+    - You don't need to be bayesian to obtain uncertainties
+    - New uncertainty estimator using classifier
+
 ## Variation factors:
 1) Datasets:
     - MNIST
