@@ -1,9 +1,9 @@
 # Uncertainty Quality
 
-Experiments repositoy for Uncertainty quality paper
+Experiments repository for Uncertainty quality paper
 
 ## Contributions
-    - You don't need to be bayesian to obtain uncertainties
+    - No need to be Bayesian to obtain uncertainties
     - New uncertainty estimator using classifier
 
 ## Variation factors:
