@@ -1,10 +1,12 @@
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 from keras.preprocessing.image import ImageDataGenerator
 from keras.datasets import mnist
 from keras.datasets import cifar10
 import keras.backend as K
+import re
 
 
 class Dataset(object):
@@ -145,13 +147,13 @@ class Melanoma(Dataset):
     def train(self):
         data_generator = ImageDataGenerator(
             rescale=1/255,
-            rotation_range=40,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.2,
-            zoom_range=0.2,
-            horizontal_flip=True,
-            fill_mode='nearest',
+            # rotation_range=40,
+            # width_shift_range=0.2,
+            # height_shift_range=0.2,
+            # shear_range=0.2,
+            # zoom_range=0.2,
+            # horizontal_flip=True,
+            # fill_mode='nearest',
         )
         return data_generator.flow_from_directory(
             directory='data/melanoma/train',
@@ -184,6 +186,42 @@ class Melanoma(Dataset):
         )
 
 
+class BostonHousing(Dataset):
+
+    def __init__(self, *args, **kwargs):
+        super(BostonHousing, self).__init__(*args, **kwargs)
+        self.type = 'regression'
+
+        data = []
+        for line in open('data/boston_housing/boston_housing.txt', 'r'):
+            values = re.sub('[ ]+', ',', line.strip()).split(',')
+            data.append([float(v) for v in values])
+        data = np.array(data)
+
+        X = data[:, :-1]
+        y = data[:, -1]
+        X, X_test, y, y_test = train_test_split(X, y, test_size=0.1)
+
+        xscaler = StandardScaler().fit(X)
+        X = xscaler.transform(X)
+        X_test = xscaler.transform(X_test)
+
+        yscaler = StandardScaler().fit(y.reshape(-1, 1))
+        y = yscaler.transform(y.reshape(-1, 1)).ravel()
+        y_test = yscaler.transform(y_test.reshape(-1, 1)).ravel()
+
+        split = int(len(X)*0.8)
+        self.X_train = X[:split]
+        self.y_train = y[:split]
+        self.X_val = X[split:]
+        self.y_val = y[split:]
+        self.X_test = X_test
+        self.y_test = y_test
+
+        self.input_shape = self.X_train.shape[1:]
+        self.output_size = 1
+
+
 def load(settings):
     name = settings.pop('name')
 
@@ -195,6 +233,8 @@ def load(settings):
         dataset = CIFAR10(**settings)
     elif name == 'melanoma':
         dataset = Melanoma(**settings)
+    elif name == 'boston_housing':
+        dataset = BostonHousing(**settings)
     else:
         raise Exception('Unknown dataset {0}'.format(name))
 

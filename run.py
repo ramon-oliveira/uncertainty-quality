@@ -22,12 +22,12 @@ def cfg():
     posterior_samples = 50
 
     dataset_settings = {
-        'name': 'mnist',
-        'batch_size': batch_size,
+        'name': 'boston_housing',
     }
 
     model_settings = {
-        'name': 'cnn',
+        'name': 'mlp',
+        'p_dropout': 0.5,
         'batch_size': batch_size,
         'epochs': epochs,
     }
@@ -173,13 +173,9 @@ def evaluate(model, dataset, posterior_samples, _log):
 @ex.automain
 def run(model_settings, dataset_settings, _log):
     _log.info('dataset_settings: ' + str(dataset_settings))
-    dataset = datasets.load(dataset_settings)
-
-    model_settings.update({
-        'input_shape': dataset.input_shape,
-        'num_classes': dataset.num_classes,
-    })
     _log.info('model_settings: ' + str(model_settings))
+    dataset = datasets.load(dataset_settings)
+    model_settings.update({'dataset': dataset})
     model = models.load(model_settings)
 
     train(model, dataset)

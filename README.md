@@ -10,8 +10,8 @@ Experiments repository for Uncertainty quality paper
 1) Datasets:
     - MNIST
     - CIFAR10
-    - Retinopathy
-    - Melanoma*
+    - Melanoma
+    - Retinopathy*
 2) Inference:
     - Maximum Likelihood (?)
     - Dropout

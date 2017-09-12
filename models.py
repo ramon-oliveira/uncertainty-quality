@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import tensorflow as tf
 import edward as ed
@@ -61,33 +62,74 @@ class BaseModel(object):
 
 class MLP(object):
 
-    def __init__(self, epochs=10, batch_size=32, inference='dropout'):
+    def __init__(self, dataset, p_dropout=0.5, epochs=100, batch_size=32):
         self.epochs = epochs
         self.batch_size = batch_size
 
+        # deterministic model
         model = Sequential()
-        model.add(Dense(1024, input_shape=input_shape))
-        model.add(Dropout(0.5))
+        model.add(Dense(1024, input_shape=dataset.input_shape))
+        model.add(Dropout(p_dropout))
         model.add(Activation('relu'))
-        model.add(Dense(1024, input_shape=input_shape))
-        model.add(Dropout(0.5))
+        model.add(Dense(1024))
+        model.add(Dropout(p_dropout))
         model.add(Activation('relu'))
-        model.add(Dense(num_classes))
-        model.add(Activation('softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-        self.model = model
+        model.add(Dense(dataset.output_size))
 
+        # probabilistic model
         probabilistic_model = Sequential()
-        probabilistic_model.add(Dense(1024, input_shape=input_shape))
-        probabilistic_model.add(BayesianDropout(0.5))
+        probabilistic_model.add(Dense(1024, input_shape=dataset.input_shape))
+        probabilistic_model.add(BayesianDropout(p_dropout))
         probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Dense(1024, input_shape=input_shape))
-        probabilistic_model.add(BayesianDropout(0.5))
+        probabilistic_model.add(Dense(1024))
+        probabilistic_model.add(BayesianDropout(p_dropout))
         probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Dense(num_classes))
-        probabilistic_model.add(Activation('softmax'))
-        probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        probabilistic_model.add(Dense(dataset.output_size))
+
+        if dataset.type == 'classification':
+            compile_params = {
+                'loss': 'categorical_crossentropy',
+                'optimizer': 'adam',
+                'metrics': ['accuracy']
+            }
+            model.add(Activation('softmax'))
+            probabilistic_model.add(Activation('softmax'))
+        else:
+            compile_params = {
+                'loss': 'mse',
+                'optimizer': 'adam',
+                'metrics': ['mae']
+            }
+
+        model.compile(**compile_params)
+        probabilistic_model.compile(**compile_params)
+        self.model = model
         self.probabilistic_model = probabilistic_model
+
+    def fit(self, dataset):
+        weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
+        cp = ModelCheckpoint(weights_filename, save_best_only=True)
+
+        self.model.fit(
+            x=dataset.X_train,
+            y=dataset.y_train,
+            validation_data=(dataset.X_val, dataset.y_val),
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            callbacks=[cp],
+        )
+
+        self.probabilistic_model.load_weights(weights_filename)
+        self.model.set_weights(self.probabilistic_model.get_weights())
+        os.remove(weights_filename)
+        return self
+
+    def predict(self, X, probabilistic=False):
+        if probabilistic:
+            model = self.probabilistic_model
+        else:
+            model = self.model
+        return model.predict(X, batch_size=self.batch_size)
 
 
 class CNN(BaseModel):
