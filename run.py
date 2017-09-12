@@ -77,15 +77,15 @@ def uncertainty_mean_entropy(y_probabilistic):
 @ex.capture
 def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples):
     y_val = []
-    for _, y in dataset.validation_generator:
+    for _, y in dataset.validation():
         y_val.extend(y.argmax(axis=1))
         if len(y_val) >= dataset.validation_samples: break
     y_val = np.array(y_val)
 
-    y_deterministic = model.predict(gen=dataset.validation_generator,
+    y_deterministic = model.predict(gen=dataset.validation(),
                                     samples=dataset.validation_samples,
                                     probabilistic=False)
-    y_probabilistic = [model.predict(gen=dataset.validation_generator,
+    y_probabilistic = [model.predict(gen=dataset.validation(),
                                      samples=dataset.validation_samples,
                                      probabilistic=True)
                        for i in tqdm.trange(posterior_samples, desc='sampling validation')]
@@ -113,15 +113,15 @@ def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples)
 @ex.capture
 def evaluate(model, dataset, posterior_samples, _log):
     y_test = []
-    for _, y in dataset.test_generator:
+    for _, y in dataset.test():
         y_test.extend(y.argmax(axis=1).tolist())
         if len(y_test) >= dataset.test_samples: break
     y_test = np.array(y_test)
 
-    y_deterministic = model.predict(gen=dataset.test_generator,
+    y_deterministic = model.predict(gen=dataset.test(),
                                     samples=dataset.test_samples,
                                     probabilistic=False)
-    y_probabilistic = [model.predict(gen=dataset.test_generator,
+    y_probabilistic = [model.predict(gen=dataset.test(),
                                      samples=dataset.test_samples,
                                      probabilistic=True)
                        for i in tqdm.trange(posterior_samples, desc='sampling')]
@@ -131,9 +131,12 @@ def evaluate(model, dataset, posterior_samples, _log):
     print(len(y_test), len(y_pred))
     print(y_test[:10])
     print(y_pred[:10])
-    acc_test = (y_test.ravel() == y_pred.ravel()).mean()
+    print(y_deterministic.argmax(axis=1)[:10])
+    acc_test = (y_test == y_pred).mean()
+    acc_test_det = (y_test == y_deterministic.argmax(axis=1)).mean()
     ex.info['accuracy_test'] = acc_test
-    _log.info('test accuracy: {0:.2f}'.format(acc_test))
+    _log.info('test accuracy: {0:.4f}'.format(acc_test))
+    _log.info('test accuracy deterministic: {0:.4f}'.format(acc_test_det))
 
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
