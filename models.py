@@ -24,7 +24,7 @@ from sklearn.preprocessing import OneHotEncoder
 class BaseModel(object):
 
     def fit(self, dataset):
-        es = EarlyStopping(monitor='val_loss', patience=10)
+        # es = EarlyStopping(monitor='val_loss', patience=10)
         weights_filename = 'runs/' + uuid.uuid4().hex + '.hdf5'
         cp = ModelCheckpoint(weights_filename, save_best_only=True)
 
@@ -35,7 +35,8 @@ class BaseModel(object):
             validation_steps=dataset.validation_samples//self.batch_size,
             epochs=self.epochs,
             workers=4,
-            callbacks=[cp, es],
+            callbacks=[cp],
+            # callbacks=[cp, es],
         )
 
         self.probabilistic_model.load_weights(weights_filename)
