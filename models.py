@@ -12,6 +12,7 @@ from keras.layers import Lambda
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
+from keras import optimizers
 from keras.applications.vgg16 import VGG16
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
@@ -116,7 +117,8 @@ class CNN(BaseModel):
         model.add(Dropout(0.5))
         model.add(Dense(num_classes))
         model.add(Activation('softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
         probabilistic_model = Sequential()
@@ -138,7 +140,7 @@ class CNN(BaseModel):
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(num_classes))
         probabilistic_model.add(Activation('softmax'))
-        probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
 
