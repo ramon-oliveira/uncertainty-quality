@@ -1,3 +1,4 @@
+import tqdm
 import numpy as np
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
@@ -5,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from keras.datasets import mnist
 from keras.datasets import cifar10
 from keras.datasets import boston_housing
+from keras.preprocessing.image import ImageDataGenerator
 import keras.backend as K
 import re
 
@@ -87,7 +89,35 @@ class Melanoma(Dataset):
         self.input_shape = x_train.shape[1:]
         self.output_size = 2
 
-        split = 1700
+        datagen = ImageDataGenerator(
+            rotation_range=30,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            shear_range=0.1,
+            zoom_range=0.1,
+            fill_mode='nearest',
+            horizontal_flip=True,
+            vertical_flip=True,
+        )
+
+        n = 48000
+        xs = []
+        ys = []
+        pbar = tqdm.tqdm(total=n)
+        for x, y in datagen.flow(x_train, y_train, batch_size=1000):
+            xs.append(x)
+            ys.append(y)
+            pbar.update(1000)
+            if len(xs)*1000 == n:
+                pbar.close()
+                break
+        xs.append(x_train)
+        ys.append(y_train)
+
+        x_train = np.vstack(xs)
+        y_train = np.vstack(ys)
+
+        split = 42000
         self.x_train = x_train[:split]
         self.y_train = y_train[:split]
         self.x_val = x_train[split:]
