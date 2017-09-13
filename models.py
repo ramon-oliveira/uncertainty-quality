@@ -128,7 +128,9 @@ class CNN(BaseModel):
         model.add(Dropout(0.5))
         model.add(Dense(dataset.output_size))
         model.add(Activation('softmax'))
-        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        # opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        # opt = optimizers.adam()
+        opt = optimizers.sgd(lr=0.0001)
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
@@ -151,7 +153,9 @@ class CNN(BaseModel):
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(dataset.output_size))
         probabilistic_model.add(Activation('softmax'))
-        opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        # opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
+        # opt = optimizers.adam()
+        opt = optimizers.sgd(lr=0.0001)
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
@@ -169,7 +173,8 @@ class VGG(BaseModel):
         x = Dropout(0.5)(x)
         x = Dense(dataset.output_size, activation='softmax', name='predictions')(x)
         self.model = Model(inputs=model.input, outputs=x)
-        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = optimizers.sgd(lr=0.0001)
+        self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
         probabilistic_model = VGG16(include_top=False, input_shape=dataset.input_shape)
         x = Flatten(name='flatten')(probabilistic_model.output)
@@ -179,7 +184,8 @@ class VGG(BaseModel):
         x = Dropout(0.5)(x)
         x = Dense(dataset.output_size, activation='softmax', name='predictions')(x)
         self.probabilistic_model = Model(inputs=probabilistic_model.input, outputs=x)
-        self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        opt = optimizers.sgd(lr=0.0001)
+        self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
 
 
 def load(settings):
