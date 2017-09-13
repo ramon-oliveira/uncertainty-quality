@@ -1,5 +1,7 @@
 import tqdm
+import xgboost as xgb
 from sklearn import metrics
+from scipy.stats import entropy
 
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0)
@@ -37,7 +39,7 @@ def uncertainty_mean_entropy(y_probabilistic):
     return y_pred, y_mean_entropy
 
 
-def uncertainty_classifer(model, dataset, X_pred_uncertainty, posterior_samples):
+def uncertainty_classifer(model, dataset, X_pred_uncertainty):
     y_val = []
     for _, y in dataset.validation():
         y_val.extend(y.argmax(axis=1))
