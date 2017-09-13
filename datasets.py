@@ -71,13 +71,13 @@ class Melanoma(Dataset):
     def __init__(self, *args, **kwargs):
         super(Melanoma, self).__init__('classification', *args, **kwargs)
 
-        x_train = np.load('data/melanoma/x_train.npy')
-        y_train = np.load('data/melanoma/y_train.npy')
-        x_test = np.load('data/melanoma/x_test.npy')
-        y_test = np.load('data/melanoma/y_test.npy')
+        x_train = np.load('data/melanoma/x_train.npy').astype('float32')
+        y_train = np.load('data/melanoma/y_train.npy').astype('int32')
+        x_test = np.load('data/melanoma/x_test.npy').astype('float32')
+        y_test = np.load('data/melanoma/y_test.npy').astype('int32')
 
-        y_train = np.eye(2)[y_train.astype(int).ravel()]
-        y_test = np.eye(2)[y_test.astype(int).ravel()]
+        y_train = np.eye(2)[y_train.ravel()]
+        y_test = np.eye(2)[y_test.ravel()]
 
         if K.image_data_format() == 'channels_first':
             x_train = x_train.reshape(-1, 3, 224, 224)/255
