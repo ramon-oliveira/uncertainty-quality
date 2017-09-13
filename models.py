@@ -13,6 +13,7 @@ from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
 from keras.layers import Flatten
 from keras import optimizers
+from keras.regularizers import l2
 from keras.applications.vgg16 import VGG16
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
@@ -60,42 +61,51 @@ class BaseModel(object):
 
 class MLP(BaseModel):
 
-    def __init__(self, dataset, dropout=0.5, *args, **kwargs):
+    def __init__(self, dataset, layers=[50], dropout=0.5, *args, **kwargs):
         super(MLP, self).__init__(*args, **kwargs)
         self.dropout = dropout
 
+        tau = 0.159707652696 # obtained from BO
+        lengthscale = 1e-2
+        reg = lengthscale**2 * (1 - dropout) / (2. * len(dataset.x_train) * tau)
+
         # deterministic model
         model = Sequential()
-        model.add(Dense(1024, input_shape=dataset.input_shape))
+        model.add(Dropout(dropout, input_shape=dataset.input_shape))
+        model.add(Dense(layers[0], kernel_regularizer=l2(reg)))
         model.add(Dropout(dropout))
         model.add(Activation('relu'))
-        model.add(Dense(1024))
-        model.add(Dropout(dropout))
-        model.add(Activation('relu'))
-        model.add(Dense(dataset.output_size))
+        for units in layers[1:]:
+            model.add(Dense(units, kernel_regularizer=l2(reg)))
+            model.add(Dropout(dropout))
+            model.add(Activation('relu'))
+        model.add(Dense(dataset.output_size, kernel_regularizer=l2(reg)))
 
         # probabilistic model
         probabilistic_model = Sequential()
-        probabilistic_model.add(Dense(1024, input_shape=dataset.input_shape))
+        probabilistic_model.add(BayesianDropout(dropout, input_shape=dataset.input_shape))
+        probabilistic_model.add(Dense(layers[0], kernel_regularizer=l2(reg)))
         probabilistic_model.add(BayesianDropout(dropout))
         probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Dense(1024))
-        probabilistic_model.add(BayesianDropout(dropout))
-        probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Dense(dataset.output_size))
+        for units in layers[1:]:
+            probabilistic_model.add(Dense(units, kernel_regularizer=l2(reg)))
+            probabilistic_model.add(BayesianDropout(dropout))
+            probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(Dense(dataset.output_size, kernel_regularizer=l2(reg)))
 
+        opt = optimizers.SGD(lr=0.001)
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))
             compile_params = {
                 'loss': 'categorical_crossentropy',
-                'optimizer': 'adam',
+                'optimizer': opt,
                 'metrics': ['accuracy']
             }
         else:
             compile_params = {
                 'loss': 'mse',
-                'optimizer': 'adam'
+                'optimizer': opt,
             }
 
         model.compile(**compile_params)

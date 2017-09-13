@@ -135,15 +135,17 @@ class BostonHousing(Dataset):
         xscaler = StandardScaler().fit(x_train)
         x_train = xscaler.transform(x_train)
         x_test = xscaler.transform(x_test)
+        self.xscaler = xscaler
 
         yscaler = StandardScaler().fit(y_train.reshape(-1, 1))
-        y_train = yscaler.transform(y_train).ravel()
-        y_test = yscaler.transform(y_test).ravel()
+        y_train = yscaler.transform(y_train.reshape(-1, 1))
+        y_test = yscaler.transform(y_test.reshape(-1, 1))
+        self.yscaler = yscaler
 
         self.input_shape = x_train.shape[1:]
         self.output_size = 1
-        self.split = int(len(x_train)*0.9)
 
+        split = int(len(x_train)*0.9)
         self.x_train = x_train[:split]
         self.y_train = y_train[:split]
         self.x_val = x_train[split:]

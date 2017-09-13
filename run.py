@@ -19,12 +19,14 @@ def cfg():
     seed = 1337
 
     dataset_settings = {
-        'name': 'cifar10',
+        'name': 'boston_housing',
     }
 
     model_settings = {
-        'name': 'cnn',
-        'epochs': 100,
+        'name': 'mlp',
+        'dropout': 0.05,
+        'layers': [50],
+        'epochs': 300,
         'batch_size': 100,
         'posterior_samples': 50,
     }
