@@ -19,15 +19,15 @@ def cfg():
     seed = 1337
 
     dataset_settings = {
-        'name': 'boston_housing',
+        'name': 'kin8nm',
     }
 
     model_settings = {
         'name': 'mlp',
         'dropout': 0.05,
-        'layers': [1024],
+        'layers': [512],
         'epochs': 300,
-        'batch_size': 64,
+        'batch_size': 100,
         'posterior_samples': 100,
     }
 

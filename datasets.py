@@ -1,5 +1,6 @@
 import tqdm
 import numpy as np
+import pandas as pd
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -154,6 +155,37 @@ class BostonHousing(Dataset):
         self.y_test = y_test
 
 
+class Kin8nm(Dataset):
+
+    def __init__(self, *args, **kwargs):
+        super(Kin8nm, self).__init__('regression', *args, **kwargs)
+        df = pd.read_csv('data/kin8nm/kin8nm.csv', header=None)
+        df[9] = -1.0
+        x = df.values[:, :8]
+        y = df.values[:, 8:]
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+
+        xscaler = StandardScaler().fit(x_train)
+        x_train = xscaler.transform(x_train)
+        x_test = xscaler.transform(x_test)
+        self.xscaler = xscaler
+
+        yscaler = StandardScaler().fit(y_train)
+        y_train = yscaler.transform(y_train)
+        y_test = yscaler.transform(y_test)
+        self.yscaler = yscaler
+
+        self.input_shape = x_train.shape[1:]
+        self.output_size = 2
+
+        split = int(len(x_train)*0.8)
+        self.x_train = x_train[:split]
+        self.y_train = y_train[:split]
+        self.x_val = x_train[split:]
+        self.y_val = y_train[split:]
+        self.x_test = x_test
+        self.y_test = y_test
+
 def load(settings):
     name = settings.pop('name')
 
@@ -167,6 +199,8 @@ def load(settings):
         dataset = Melanoma(**settings)
     elif name == 'boston_housing':
         dataset = BostonHousing(**settings)
+    elif name == 'kin8nm':
+        dataset = Kin8nm(**settings)
     else:
         raise Exception('Unknown dataset {0}'.format(name))
 

@@ -17,8 +17,17 @@ from keras.regularizers import l2
 from keras.applications.vgg16 import VGG16
 from keras.callbacks import EarlyStopping
 from keras.callbacks import ModelCheckpoint
-
+import keras.backend as K
 from layers import BayesianDropout
+
+
+def log_gaussian2(x, mean, log_std):
+    log_var = 2*log_std
+    return -K.log(2*np.pi)/2.0 - log_var/2.0 - (x-mean)**2/(2*K.exp(log_var))
+
+
+def nll_gaussian(y_true, y_pred):
+    return -log_gaussian2(y_pred[:, 0], y_true[:, 0], y_pred[:, 1])
 
 
 class BaseModel(object):
@@ -93,7 +102,7 @@ class MLP(BaseModel):
             probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(Dense(dataset.output_size))
 
-        opt = optimizers.Adam(lr=0.01)
+        opt = optimizers.Adam()
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))
@@ -104,7 +113,7 @@ class MLP(BaseModel):
             }
         else:
             compile_params = {
-                'loss': 'mse',
+                'loss': nll_gaussian,
                 'optimizer': opt,
             }
 
