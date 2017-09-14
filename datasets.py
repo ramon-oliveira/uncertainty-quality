@@ -145,7 +145,7 @@ class BostonHousing(Dataset):
         self.input_shape = x_train.shape[1:]
         self.output_size = 1
 
-        split = int(len(x_train)*0.9)
+        split = int(len(x_train)*0.8)
         self.x_train = x_train[:split]
         self.y_train = y_train[:split]
         self.x_val = x_train[split:]

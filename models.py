@@ -71,29 +71,29 @@ class MLP(BaseModel):
 
         # deterministic model
         model = Sequential()
-        model.add(Dropout(dropout, input_shape=dataset.input_shape))
-        model.add(Dense(layers[0], kernel_regularizer=l2(reg)))
+        # model.add(Dropout(dropout, input_shape=dataset.input_shape))
+        model.add(Dense(layers[0], input_shape=dataset.input_shape))
         model.add(Dropout(dropout))
         model.add(Activation('relu'))
         for units in layers[1:]:
-            model.add(Dense(units, kernel_regularizer=l2(reg)))
+            model.add(Dense(units))
             model.add(Dropout(dropout))
             model.add(Activation('relu'))
-        model.add(Dense(dataset.output_size, kernel_regularizer=l2(reg)))
+        model.add(Dense(dataset.output_size))
 
         # probabilistic model
         probabilistic_model = Sequential()
-        probabilistic_model.add(BayesianDropout(dropout, input_shape=dataset.input_shape))
-        probabilistic_model.add(Dense(layers[0], kernel_regularizer=l2(reg)))
+        # probabilistic_model.add(BayesianDropout(dropout, input_shape=dataset.input_shape))
+        probabilistic_model.add(Dense(layers[0], input_shape=dataset.input_shape))
         probabilistic_model.add(BayesianDropout(dropout))
         probabilistic_model.add(Activation('relu'))
         for units in layers[1:]:
-            probabilistic_model.add(Dense(units, kernel_regularizer=l2(reg)))
+            probabilistic_model.add(Dense(units))
             probabilistic_model.add(BayesianDropout(dropout))
             probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Dense(dataset.output_size, kernel_regularizer=l2(reg)))
+        probabilistic_model.add(Dense(dataset.output_size))
 
-        opt = optimizers.SGD(lr=0.001)
+        opt = optimizers.Adam(lr=0.01)
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))
