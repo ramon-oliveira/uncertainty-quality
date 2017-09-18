@@ -1,0 +1,594 @@
+{
+  "evaluations": [
+    {
+      "ll_normal": -22.68337843684682,
+      "ll_tau": {
+        "py/id": 1
+      },
+      "ll_uncertainty": {
+        "py/id": 1
+      },
+      "rmse_test": 3.749505750991478,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.7665608007074156
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.76505015202294
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.786578829620763
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.407585430631334
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.407585430631334
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.4078848561026223
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.407585430631334
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -23.471806175371736,
+      "ll_tau": {
+        "py/id": 31
+      },
+      "ll_uncertainty": {
+        "py/id": 31
+      },
+      "rmse_test": 3.7598201496057095,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.7074475723435705
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.7605025146919377
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.791129314820453
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4551912633848803
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.4551912633848803
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.4552050059665396
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.448637784355367
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.111212300017858,
+      "ll_tau": {
+        "py/id": 61
+      },
+      "ll_uncertainty": {
+        "py/id": 61
+      },
+      "rmse_test": 3.7667580438332524,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.5155753734961195
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.78253635449195
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.803976668725417
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.417839946206907
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.417839946206907
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.417919015497817
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.417839946206907
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.5187650088569,
+      "ll_tau": {
+        "py/id": 91
+      },
+      "ll_uncertainty": {
+        "py/id": 91
+      },
+      "rmse_test": 3.755810365732837,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.1047990411577264
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.7722466969107296
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.7928975201120205
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4280568429282883
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.428056842928288
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.4281586664490544
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4280568429282883
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.890986343371754,
+      "ll_tau": {
+        "py/id": 121
+      },
+      "ll_uncertainty": {
+        "py/id": 121
+      },
+      "rmse_test": 3.7941570606588724,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.429219798114048
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.8097972915954452
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.8317790602550446
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4396005244974877
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.8313778346146994
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.439794370385839
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.439600524497487
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.340435591432357,
+      "ll_tau": {
+        "py/id": 151
+      },
+      "ll_uncertainty": {
+        "py/id": 151
+      },
+      "rmse_test": 3.7555937425133092,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.3772134852840052
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.7699413574468155
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.7928350772048764
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.388017343122757
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.3880173431227574
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.388014778235544
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.388017343122757
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.227597111719156,
+      "ll_tau": {
+        "py/id": 181
+      },
+      "ll_uncertainty": {
+        "py/id": 181
+      },
+      "rmse_test": 3.7760841301023875,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.524950498390235
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.7917923519738075
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.813411856189656
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4140221112380016
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.414022111238002
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.414212644564335
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4140221112380016
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -24.94010253541338,
+      "ll_tau": {
+        "py/id": 211
+      },
+      "ll_uncertainty": {
+        "py/id": 211
+      },
+      "rmse_test": 3.6926650666304806,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.7246755232697257
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.692669634804775
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.722206431610035
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.6850732914077384
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.6850732914077384
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.344551915570631
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.344913401255317
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -22.329787800052376,
+      "ll_tau": {
+        "py/id": 241
+      },
+      "ll_uncertainty": {
+        "py/id": 241
+      },
+      "rmse_test": 3.7658647417804927,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.4926448342198304
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.782443543311527
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.8031265954332443
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.430700629989716
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.4307006299897154
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.4307385609230066
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.4307006299897154
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    },
+    {
+      "ll_normal": -24.930148246458575,
+      "ll_tau": {
+        "py/id": 271
+      },
+      "ll_uncertainty": {
+        "py/id": 271
+      },
+      "rmse_test": 3.7115979856970998,
+      "uncertainty_classifer": [
+        [
+          0.9803921568627451,
+          3.7432547536030447
+        ]
+      ],
+      "uncertainty_classifer_auc": 0.0,
+      "uncertainty_nll_gaussian": [
+        [
+          0.9803921568627451,
+          3.713278771630216
+        ]
+      ],
+      "uncertainty_nll_gaussian_auc": 0.0,
+      "uncertainty_nll_gaussian_std": [
+        [
+          0.9803921568627451,
+          3.7403411347459232
+        ]
+      ],
+      "uncertainty_nll_gaussian_std_auc": 0.0,
+      "uncertainty_predicted_std": [
+        [
+          0.9803921568627451,
+          3.703968029495657
+        ]
+      ],
+      "uncertainty_predicted_std_auc": 0.0,
+      "uncertainty_predicted_std_det": [
+        [
+          0.9803921568627451,
+          3.7039680294956567
+        ]
+      ],
+      "uncertainty_predicted_std_det_auc": 0.0,
+      "uncertainty_std_predicted_mean": [
+        [
+          0.9803921568627451,
+          3.3621368599895747
+        ]
+      ],
+      "uncertainty_std_predicted_mean_auc": 0.0,
+      "uncertainty_std_predicted_std": [
+        [
+          0.9803921568627451,
+          3.3623493304879633
+        ]
+      ],
+      "uncertainty_std_predicted_std_auc": 0.0
+    }
+  ]
+}
