@@ -1,0 +1,94 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/Repos/uncertainty-quality",
+    "dependencies": [
+      "numpy==1.13.1",
+      "sacred==0.7.0"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_bd0719ff3a9a3566954bc316180f6cce.py"
+      ],
+      [
+        "evaluate_classification.py",
+        "_sources/evaluate_classification_29142860d59ae38f5d69a305bc84c949.py"
+      ],
+      [
+        "evaluate_regression.py",
+        "_sources/evaluate_regression_6749d9de82c88fbb2169c329ca81b5b5.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_84016068a7134a78afcf90ad3f77ed01.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_3a3a96b03af8738d37d780384f2f4962.py"
+      ]
+    ]
+  },
+  "fail_trace": [
+    "Traceback (most recent call last):\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/run.py\", line 261, in _get_captured_output\n    text = text.decode('utf-8')\n",
+    "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x88 in position 0: invalid start byte\n"
+  ],
+  "heartbeat": "2017-09-18T03:04:03.412221",
+  "host": {
+    "ENV": {},
+    "cpu": "Intel(R) Core(TM) i5-7400 CPU @ 3.00GHz",
+    "gpus": {
+      "driver_version": "384.66",
+      "gpus": [
+        {
+          "model": "GeForce GTX 1050 Ti",
+          "persistence_mode": false,
+          "total_memory": 4037
+        }
+      ]
+    },
+    "hostname": "roliveira",
+    "os": [
+      "Linux",
+      "Linux-4.10.0-33-generic-x86_64-with-debian-stretch-sid"
+    ],
+    "python_version": "3.6.1"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--capture": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [],
+      "help": false,
+      "with": false
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2017-09-18T02:40:40.049734",
+  "status": "FAILED",
+  "stop_time": "2017-09-18T03:04:05.181077"
+}
