@@ -17,7 +17,7 @@ ex.observers.append(FileStorageObserver.create('runs/'))
 @ex.config
 def cfg():
     seed = 1337
-    num_experiments = 5
+    num_experiments = 10
 
     dataset_settings = {
         'name': 'protein_structure',
