@@ -145,14 +145,16 @@ def evaluate(model, dataset):
     tau = 0.159707652696 # obtained from BO
     ll = (logsumexp(-0.5 * tau * (y_true[:, 0] - y_pred[:, 0])**2, axis=0) - np.log(model.posterior_samples)
           - 0.5*np.log(2*np.pi) - 0.5*np.log(tau))
-    print('log-likelihood tau:', np.mean(ll))
+    ll_test = np.mean(ll)
+    print('log-likelihood tau:', ll_test)
     info['ll_tau'] = ll_test
 
     tau = uncertainty
     tau[tau <= 0] = 1e-6
     ll = (logsumexp(-0.5 * tau * (y_true[:, 0] - y_pred[:, 0])**2, axis=0) - np.log(model.posterior_samples)
           - 0.5*np.log(2*np.pi) - 0.5*np.log(tau))
-    print('log-likelihood uncertainty:', np.mean(ll))
+    ll_test = np.mean(ll)
+    print('log-likelihood uncertainty:', ll_test)
     info['ll_uncertainty'] = ll_test
 
     return info

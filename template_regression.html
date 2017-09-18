@@ -17,6 +17,64 @@
 </head>
 <body>
 
+<div class="container">
+<div class="card">
+<div class="card-content">
+    <table class="bordered">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Gal</th>
+                <th>Ours</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <%
+                    import numpy as np
+                    gal = np.array([info['evaluations'][i]['uncertainty_std_predicted_mean_auc'] for i in range(len(info['evaluations']))])
+                    ours = np.array([info['evaluations'][i]['uncertainty_classifer_auc'] for i in range(len(info['evaluations']))])
+
+                    gal_mean = np.mean(gal)
+                    gal_std = np.std(gal)
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUC (RMSE)</td>
+                % if gal_mean > ours_mean:
+                    <td>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % else:
+                    <td><b>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</b></td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % endif
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    gal = np.array([info['evaluations'][i]['ll_tau'] for i in range(len(info['evaluations']))])
+                    ours = np.array([info['evaluations'][i]['ll_uncertainty'] for i in range(len(info['evaluations']))])
+
+                    gal_mean = np.mean(gal)
+                    gal_std = np.std(gal)
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>likelihood</td>
+                % if gal_mean < ours_mean:
+                    <td>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % else:
+                    <td><b>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</b></td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % endif
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
 <%
 import numpy as np
 from bokeh.plotting import figure
