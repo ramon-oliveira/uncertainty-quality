@@ -80,7 +80,6 @@ class MLP(BaseModel):
 
         # deterministic model
         model = Sequential()
-        # model.add(Dropout(dropout, input_shape=dataset.input_shape))
         model.add(Dense(layers[0], input_shape=dataset.input_shape))
         model.add(Dropout(dropout))
         model.add(Activation('relu'))
@@ -92,7 +91,6 @@ class MLP(BaseModel):
 
         # probabilistic model
         probabilistic_model = Sequential()
-        # probabilistic_model.add(BayesianDropout(dropout, input_shape=dataset.input_shape))
         probabilistic_model.add(Dense(layers[0], input_shape=dataset.input_shape))
         probabilistic_model.add(BayesianDropout(dropout))
         probabilistic_model.add(Activation('relu'))
@@ -102,7 +100,7 @@ class MLP(BaseModel):
             probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(Dense(dataset.output_size))
 
-        opt = optimizers.Adam()
+        opt = optimizers.Nadam()
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))
@@ -186,25 +184,25 @@ class VGG(BaseModel):
 
         model = VGG16(include_top=False, input_shape=dataset.input_shape)
         x = Flatten(name='flatten')(model.output)
-        x = Dense(512, activation='relu', name='fc1')(x)
+        x = Dense(1024, activation='relu', name='fc1')(x)
         x = Dropout(0.5)(x)
-        x = Dense(512, activation='relu', name='fc2')(x)
+        x = Dense(1024, activation='relu', name='fc2')(x)
         x = Dropout(0.5)(x)
         x = Dense(dataset.output_size, activation='softmax', name='predictions')(x)
         self.model = Model(inputs=model.input, outputs=x)
         opt = optimizers.sgd(lr=0.0001)
-        self.model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
         probabilistic_model = VGG16(include_top=False, input_shape=dataset.input_shape)
         x = Flatten(name='flatten')(probabilistic_model.output)
-        x = Dense(512, activation='relu', name='fc1')(x)
+        x = Dense(1024, activation='relu', name='fc1')(x)
         x = Dropout(0.5)(x)
-        x = Dense(512, activation='relu', name='fc2')(x)
+        x = Dense(1024, activation='relu', name='fc2')(x)
         x = Dropout(0.5)(x)
         x = Dense(dataset.output_size, activation='softmax', name='predictions')(x)
         self.probabilistic_model = Model(inputs=probabilistic_model.input, outputs=x)
         opt = optimizers.sgd(lr=0.0001)
-        self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        self.probabilistic_model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 
 def load(settings):
@@ -220,5 +218,7 @@ def load(settings):
         model = VGG(**settings)
     else:
         raise Exception('Unknown model {0}'.format(name))
+
+    settings['name'] = name
 
     return model

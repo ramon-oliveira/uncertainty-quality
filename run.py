@@ -17,6 +17,7 @@ ex.observers.append(FileStorageObserver.create('runs/'))
 @ex.config
 def cfg():
     seed = 1337
+    num_experiments = 5
 
     dataset_settings = {
         'name': 'protein_structure',
@@ -25,8 +26,8 @@ def cfg():
     model_settings = {
         'name': 'mlp',
         'dropout': 0.05,
-        'layers': [50],
-        'epochs': 300,
+        'layers': [50, 50],
+        'epochs': 100,
         'batch_size': 100,
         'posterior_samples': 100,
     }
@@ -40,18 +41,20 @@ def train(model, dataset):
 @ex.capture
 def evaluate(model, dataset):
     if dataset.type == 'classification':
-        evaluate_classification.evaluate(ex, model, dataset)
+        return evaluate_classification.evaluate(model, dataset)
     else:
-        evaluate_regression.evaluate(ex, model, dataset)
+        return evaluate_regression.evaluate(model, dataset)
 
 
 @ex.automain
-def run(model_settings, dataset_settings, _log):
+def run(model_settings, dataset_settings, num_experiments, _log):
     _log.info('dataset_settings: ' + str(dataset_settings))
     _log.info('model_settings: ' + str(model_settings))
-    dataset = datasets.load(dataset_settings)
-    model_settings.update({'dataset': dataset})
-    model = models.load(model_settings)
 
-    train(model, dataset)
-    evaluate(model, dataset)
+    ex.info['evaluations'] = []
+    for i in range(num_experiments):
+        dataset = datasets.load(dataset_settings)
+        model_settings.update({'dataset': dataset})
+        model = models.load(model_settings)
+        train(model, dataset)
+        ex.info['evaluations'].append(evaluate(model, dataset))

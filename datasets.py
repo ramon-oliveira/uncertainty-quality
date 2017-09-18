@@ -132,19 +132,21 @@ class BostonHousing(Dataset):
     def __init__(self, *args, **kwargs):
         super(BostonHousing, self).__init__('regression', *args, **kwargs)
         (x_train, y_train), (x_test, y_test) = boston_housing.load_data()
+        y_train = np.hstack([y_train.reshape(-1, 1), -np.ones(shape=[len(y_train), 1])])
+        y_test = np.hstack([y_test.reshape(-1, 1), -np.ones(shape=[len(y_test), 1])])
 
         xscaler = StandardScaler().fit(x_train)
         x_train = xscaler.transform(x_train)
         x_test = xscaler.transform(x_test)
         self.xscaler = xscaler
 
-        yscaler = StandardScaler().fit(y_train.reshape(-1, 1))
-        y_train = yscaler.transform(y_train.reshape(-1, 1))
-        y_test = yscaler.transform(y_test.reshape(-1, 1))
+        yscaler = StandardScaler().fit(y_train)
+        y_train = yscaler.transform(y_train)
+        y_test = yscaler.transform(y_test)
         self.yscaler = yscaler
 
         self.input_shape = x_train.shape[1:]
-        self.output_size = 1
+        self.output_size = 2
 
         split = int(len(x_train)*0.8)
         self.x_train = x_train[:split]
@@ -153,6 +155,10 @@ class BostonHousing(Dataset):
         self.y_val = y_train[split:]
         self.x_test = x_test
         self.y_test = y_test
+
+        print(self.x_train.shape, self.y_train.shape)
+        print(self.x_val.shape, self.y_val.shape)
+        print(self.x_test.shape, self.y_test.shape)
 
 
 class Kin8nm(Dataset):
@@ -195,7 +201,7 @@ class ProteinStructure(Dataset):
         x = df.values[:, 1:].astype('float32')
         y = df.values[:, 0:1].astype('float32')
         y = np.hstack([y, -np.ones(shape=[len(y), 1])])
-        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+        x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)
 
         xscaler = StandardScaler().fit(x_train)
         x_train = xscaler.transform(x_train)
@@ -238,5 +244,7 @@ def load(settings):
         dataset = ProteinStructure(**settings)
     else:
         raise Exception('Unknown dataset {0}'.format(name))
+
+    settings['name'] = name
 
     return dataset
