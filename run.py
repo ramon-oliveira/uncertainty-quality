@@ -11,13 +11,13 @@ import evaluate_regression
 
 ex = Experiment('uncertainty-quality')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
-ex.observers.append(FileStorageObserver.create('runs/'))
+ex.observers.append(FileStorageObserver.create('runs/', template='template_regression.html'))
 
 
 @ex.config
 def cfg():
     seed = 1337
-    num_experiments = 10
+    num_experiments = 3
 
     dataset_settings = {
         'name': 'protein_structure',

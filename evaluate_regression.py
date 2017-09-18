@@ -49,9 +49,9 @@ def uncertainty_nll_gaussian_std(y_det_prob):
 
 
 def uncertainty_classifer(model, dataset, test_uncertainty):
-    x_val = np.vstack([dataset.x_train, dataset.x_val])
-    y_val = np.vstack([dataset.y_train, dataset.y_val])
-    # x_val, y_val = dataset.x_val, dataset.y_val
+    # x_val = np.vstack([dataset.x_train, dataset.x_val])
+    # y_val = np.vstack([dataset.y_train, dataset.y_val])
+    x_val, y_val = dataset.x_val, dataset.y_val
 
     y_deterministic = model.predict(x_val, probabilistic=False)
     y_probabilistic = model.predict(x_val, probabilistic=True)
@@ -74,7 +74,7 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
         uncertainty = func(y_score)
         x[:, i] = uncertainty
 
-    rg = xgb.XGBRegressor(max_depth=2).fit(x, y)
+    rg = xgb.XGBRegressor(learning_rate=0.01).fit(x, y)
     # rg = linear_model.RidgeCV(alphas=np.linspace(0.1, 10, 20)).fit(x, y)
     uncertainty = rg.predict(test_uncertainty)
     return uncertainty

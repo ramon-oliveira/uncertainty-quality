@@ -1,108 +1,61 @@
 <!DOCTYPE html>
 <html>
-
 <head>
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <!--Import Google Icon Font-->
   <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <!--Import materialize.css-->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.1/css/materialize.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
 
-  <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.4.min.css" rel="stylesheet" type="text/css">
-  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.4.min.css" rel="stylesheet" type="text/css">
-  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.4.min.js"></script>
-  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.4.min.js"></script>
-
-  <!--Let browser know website is optimized for mobile-->
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.css" rel="stylesheet" type="text/css">
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.css" rel="stylesheet" type="text/css">
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.6.min.js"></script>
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.6.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 </head>
-
 <body>
 
-<div class="container">
-<div class="row">
-<div class="col s6 offset-s3">
-<div class="card blue-grey darken-1">
-<div class="card-content white-text">
-  <h5>Measurements</h5>
-  <table class="bordered">
-    <tbody>
-      % for m in sorted(info['measurements']):
-        <tr>
-          <th>${m}</th>
-          <td>${'{0:.2f}'.format(info[m])}</td>
-        </tr>
-      % endfor
-    </tbody>
-  </table>
-</div>
-</div>
-</div>
-</div>
-</div>
-
-
 <%
-import pandas as pd
-from bokeh.charts import Donut
-from bokeh import embed
-
-values = [v for *others, v in info['tables']['components_proportion'][1:]]
-labels = info['components']
-
-data = pd.Series(values, index=['{0}: {1:.2f}%'.format(l, v) for l, v in zip(labels, values)])
-pie_chart = Donut(data, plot_width=600, plot_height=600)
-
-donut_script, donut_div = embed.components(pie_chart)
-%>
-
-<div class="container">
-<div class="card">
-<div class="card-content">
-    <center>
-    <h5>Class distribution</h5>
-    ${donut_script}
-    ${donut_div}
-    </center>
-</div>
-</div>
-</div>
-
-<%
-
 import numpy as np
 from bokeh.plotting import figure
 from bokeh import embed
+from bokeh.palettes import Category20_20
+colors = Category20_20
 
-components = info['components']
-cm = np.array(info['confusion_matrix'])
-cm_norm = cm/cm.sum(axis=1, keepdims=True)
+c = 0
+p = figure(title='MLP - Protein Structure', plot_width=800, plot_height=600)
+for k in info['evaluations'][0].keys():
+    if not k.startswith('uncertainty') or k.endswith('auc'): continue
+    xys = np.array([info['evaluations'][i][k] for i in range(len(info['evaluations']))])
+    xs = np.mean(xys, axis=0)[:, 0]
+    ys = np.mean(xys, axis=0)[:, 1]
+    stds = np.std(xys, axis=0)[:, 1]
 
-p = figure(title='Confusion Matrix', plot_width=800, plot_height=600,
-           x_range=components, y_range=list(reversed(components)))
+    # Bollinger shading glyph:
+    auc = np.array([info['evaluations'][i][k+'_auc'] for i in range(len(info['evaluations']))])
+    auc = np.mean(auc)
+    band_x = np.append(xs, xs[::-1])
+    band_y = np.append(ys - stds, (ys + stds)[::-1])
+    p.patch(band_x, band_y, color=colors[c], fill_alpha=0.2)
+    p.line(xs, ys, legend='{0}: {1:.5f}'.format(k, auc), color=colors[c], line_width=3)
+    c += 1
 
-for y in range(cm_norm.shape[0]):
-    for x in range(cm_norm.shape[1]):
-        alpha = cm_norm[y, x]
-        p.rect([x+1], [cm_norm.shape[0] - y], width=1, height=1,
-               alpha=alpha)
-        p.text(x=[x+0.7], y=[cm_norm.shape[0] - y - 0.15],
-               text=['{:.2f}%'.format(alpha*100)], text_font_size="10pt")
-p.xgrid.grid_line_color = None
-p.ygrid.grid_line_color = None
-p.yaxis.axis_label = 'True'
-p.xaxis.axis_label = 'Predicted'
-cm_script, cm_div = embed.components(p)
+p.xaxis.axis_label = 'data proportion'
+p.yaxis.axis_label = 'RMSE'
+p.legend.location = 'bottom_right'
+
+chart_script, chart_div = embed.components(p)
 
 %>
 
 <div class="container">
 <div class="card">
 <div class="card-content">
-    <center>
-    <h5>Confusion Matrix</h5>
-    ${cm_script}
-    ${cm_div}
-    </center>
+    <h5>Uncertainty metrics</h5>
+    ${chart_script}
+    ${chart_div}
 </div>
 </div>
 </div>
@@ -114,38 +67,6 @@ def to_str(v):
     return '{0:.2f}'.format(v)
   return v
 %>
-
-<div class="container">
-<div class="row">
-% for k in sorted(info['tables'].keys()):
-  <div class="col s6">
-  <div class="card blue-grey darken-1">
-  <div class="card-content white-text">
-    <h5>${k}</h5>
-    <table class="bordered">
-      <thead>
-        <tr>
-          % for h in info['tables'][k][0]:
-            <th>${h}</th>
-          % endfor
-        </tr>
-      </thead>
-      <tbody>
-        % for values in info['tables'][k][1:]:
-          <tr>
-            % for v in values:
-                <td>${to_str(v)}</td>
-            % endfor
-          </tr>
-        % endfor
-      </tbody>
-    </table>
-  </div>
-  </div>
-  </div>
-% endfor
-</div>
-</div>
 
 <%
   from dateutil import parser
@@ -240,8 +161,7 @@ def to_str(v):
 
 
   <!--Import jQuery before materialize.js-->
-  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+
 </body>
 
 </html>
