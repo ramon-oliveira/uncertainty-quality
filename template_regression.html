@@ -8,10 +8,10 @@
   <!--Import materialize.css-->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
 
-  <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.css" rel="stylesheet" type="text/css">
-  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.7.min.css" rel="stylesheet" type="text/css">
-  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.7.min.js"></script>
-  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.7.min.js"></script>
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.9.min.css" rel="stylesheet" type="text/css">
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.9.min.css" rel="stylesheet" type="text/css">
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.9.min.js"></script>
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.9.min.js"></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 </head>
@@ -20,6 +20,7 @@
 <div class="container">
 <div class="card">
 <div class="card-content">
+    <h3>Dataset: ${config['dataset_settings']['name']}</h3>
     <table class="bordered">
         <thead>
             <tr>
@@ -29,6 +30,18 @@
             </tr>
         </thead>
         <tbody>
+            <tr>
+                <%
+                    import numpy as np
+                    gal = np.array([info['evaluations'][i]['rmse_test'] for i in range(len(info['evaluations']))])
+
+                    gal_mean = np.mean(gal)
+                    gal_std = np.std(gal)
+                %>
+                <td>RMSE</td>
+                <td>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</td>
+                <td>NA</td>
+            </tr>
             <tr>
                 <%
                     import numpy as np
@@ -84,7 +97,7 @@ colors = Category20_20
 
 c = 0
 p = figure(title='MLP - Protein Structure', plot_width=800, plot_height=600)
-for k in info['evaluations'][0].keys():
+for k in sorted(info['evaluations'][0].keys()):
     if not k.startswith('uncertainty') or k.endswith('auc'): continue
     xys = np.array([info['evaluations'][i][k] for i in range(len(info['evaluations']))])
     xs = np.mean(xys, axis=0)[:, 0]
