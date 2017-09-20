@@ -26,7 +26,7 @@ def cfg():
     model_settings = {
         'name': 'mlp',
         'dropout': 0.05,
-        'layers': [50, 50],
+        'layers': [100, 100],
         'epochs': 300,
         'batch_size': 100,
         'posterior_samples': 1000,

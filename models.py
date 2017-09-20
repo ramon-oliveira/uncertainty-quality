@@ -100,7 +100,7 @@ class MLP(BaseModel):
             probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(Dense(dataset.output_size))
 
-        opt = optimizers.Adam()
+        opt = optimizers.Nadam()
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))

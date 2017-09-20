@@ -4,6 +4,11 @@ from scipy.stats import entropy
 from sklearn import linear_model
 from scipy.stats import norm
 from scipy.misc import logsumexp
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.ensemble import RandomForestRegressor
 
 
 def uncertainty_std_predicted_mean(y_probabilistic):
@@ -19,7 +24,7 @@ def uncertainty_predicted_std_det(y_deterministic):
 
 
 def uncertainty_std_predicted_std(y_probabilistic):
-    return y_probabilistic.std(axis=0)[:, 1]
+    return -y_probabilistic.std(axis=0)[:, 1]
 
 
 def uncertainty_nll_gaussian(y_det_prob):
@@ -43,7 +48,7 @@ def uncertainty_nll_gaussian_std(y_det_prob):
 
     uncertainty = []
     for i, (mean, log_std) in enumerate(y_deterministic):
-        u = np.std(log_gaussian2(y_probabilistic[:, 0], mean, log_std))
+        u = -np.std(log_gaussian2(y_probabilistic[:, 0], mean, log_std))
         uncertainty.append(u)
     return np.array(uncertainty)
 
@@ -60,23 +65,39 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
         ('uncertainty_std_predicted_mean', uncertainty_std_predicted_mean, (y_probabilistic)),
         ('uncertainty_predicted_std', uncertainty_predicted_std, (y_probabilistic)),
         ('uncertainty_predicted_std_det', uncertainty_predicted_std_det, (y_deterministic)),
-        # ('uncertainty_std_predicted_std', uncertainty_std_predicted_std, (y_probabilistic)),
+        ('uncertainty_std_predicted_std', uncertainty_std_predicted_std, (y_probabilistic)),
         ('uncertainty_nll_gaussian', uncertainty_nll_gaussian, (y_deterministic, y_probabilistic)),
-        # ('uncertainty_nll_gaussian_std', uncertainty_nll_gaussian_std, (y_deterministic, y_probabilistic)),
+        ('uncertainty_nll_gaussian_std', uncertainty_nll_gaussian_std, (y_deterministic, y_probabilistic)),
     ]
 
     x = np.zeros([len(y_val), len(uncertainties) + dataset.output_size])
     x[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
     # use as target
-    y = (y_val[:, 0] - y_probabilistic.mean(axis=0)[:, 0])**2
+    y = np.abs(y_val[:, 0] - y_probabilistic.mean(axis=0)[:, 0])
 
     for i, (name, func, y_score) in enumerate(uncertainties):
         uncertainty = func(y_score)
         x[:, i] = uncertainty
 
+    poly = PolynomialFeatures(2).fit(x)
+    x = poly.transform(x)
+    xscaler = StandardScaler().fit(x)
+    yscaler = StandardScaler().fit(y.reshape(-1, 1))
+    x = xscaler.transform(x)
+    y = yscaler.transform(y.reshape(-1, 1))
+
+    params = {
+        'n_estimators': [100, 200],
+        'learning_rate': [0.1, 0.01],
+        'max_depth': [2, 3, 4],
+    }
+    # rg = GridSearchCV(RandomForestRegressor(), params, scoring='neg_mean_squared_error', n_jobs=3).fit(x, y)
+    # rg = RandomizedSearchCV(xgb.XGBRegressor(), params, scoring='neg_mean_squared_error', n_jobs=3).fit(x, y)
     # rg = xgb.XGBRegressor().fit(x, y)
-    rg = linear_model.RidgeCV(alphas=np.linspace(0.1, 10, 50), scoring='neg_mean_squared_error').fit(x, y)
-    uncertainty = rg.predict(test_uncertainty)
+    rg = linear_model.RidgeCV(alphas=np.linspace(0.01, 10, 100), scoring='neg_mean_squared_error').fit(x, y)
+    test_uncertainty = poly.transform(test_uncertainty)
+    test_uncertainty = xscaler.transform(test_uncertainty)
+    uncertainty = yscaler.inverse_transform(rg.predict(test_uncertainty)).ravel()
     return uncertainty
 
 
@@ -103,9 +124,9 @@ def evaluate(model, dataset):
         ('uncertainty_std_predicted_mean', uncertainty_std_predicted_mean, (y_probabilistic)),
         ('uncertainty_predicted_std', uncertainty_predicted_std, (y_probabilistic)),
         ('uncertainty_predicted_std_det', uncertainty_predicted_std_det, (y_deterministic)),
-        # ('uncertainty_std_predicted_std', uncertainty_std_predicted_std, (y_probabilistic)),
+        ('uncertainty_std_predicted_std', uncertainty_std_predicted_std, (y_probabilistic)),
         ('uncertainty_nll_gaussian', uncertainty_nll_gaussian, (y_deterministic, y_probabilistic)),
-        # ('uncertainty_nll_gaussian_std', uncertainty_nll_gaussian_std, (y_deterministic, y_probabilistic)),
+        ('uncertainty_nll_gaussian_std', uncertainty_nll_gaussian_std, (y_deterministic, y_probabilistic)),
     ]
 
     test_uncertainty = np.zeros([len(y_test), len(uncertainties) + dataset.output_size])
@@ -161,5 +182,22 @@ def evaluate(model, dataset):
     ll_test = np.mean(ll)
     print('log-likelihood uncertainty:', ll_test)
     info['ll_uncertainty'] = ll_test
+
+    var = np.exp(y_pred[:, 1])**2
+    # var[var <= 0] = 1e-4
+    ll_test = np.mean(-0.5 * np.log(2 * np.pi * var) - \
+              0.5 * (y_true[:, 0] - y_pred[:, 0])**2 / var)
+
+    print('log-likelihood ryan var:', ll_test)
+    info['ll_ryan_var'] = ll_test
+
+    var = np.sqrt(uncertainty) #np.exp(y_pred[:, 1])**2
+    # var[var <= 0] = 1e-4
+    ll_test = np.mean(-0.5 * np.log(2 * np.pi * var) - \
+              0.5 * (y_true[:, 0] - y_pred[:, 0])**2 / var)
+
+    print('log-likelihood ryan uncertainty:', ll_test)
+    info['ll_ryan_rg'] = ll_test
+
 
     return info
