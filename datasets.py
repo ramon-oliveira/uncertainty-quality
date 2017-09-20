@@ -131,8 +131,14 @@ class BostonHousing(Dataset):
 
     def __init__(self, *args, **kwargs):
         super(BostonHousing, self).__init__('regression', *args, **kwargs)
-        seed = np.random.randint(100000)
-        (x_train, y_train), (x_test, y_test) = boston_housing.load_data(seed=seed, test_split=0.1)
+        self.sota = {
+            'rmse_mean': 2.97,
+            'rmse_std': 0.84,
+            'll_mean': -2.41,
+            'll_std': 0.25,
+            'reference': 'https://arxiv.org/pdf/1612.01474.pdf',
+        }
+        (x_train, y_train), (x_test, y_test) = boston_housing.load_data(test_split=0.1)
         y_train = np.hstack([y_train.reshape(-1, 1), -np.ones(shape=[len(y_train), 1])])
         y_test = np.hstack([y_test.reshape(-1, 1), -np.ones(shape=[len(y_test), 1])])
 
@@ -166,6 +172,13 @@ class Kin8nm(Dataset):
 
     def __init__(self, *args, **kwargs):
         super(Kin8nm, self).__init__('regression', *args, **kwargs)
+        self.sota = {
+            'rmse_mean': 0.09,
+            'rmse_std': 0.00,
+            'll_mean': 1.20,
+            'll_std': 0.02,
+            'reference': 'https://arxiv.org/pdf/1612.01474.pdf',
+        }
         df = pd.read_csv('data/kin8nm/kin8nm.csv', header=None)
         df[9] = -1.0
         x = df.values[:, :8]
@@ -198,6 +211,13 @@ class ProteinStructure(Dataset):
 
     def __init__(self, *args, **kwargs):
         super(ProteinStructure, self).__init__('regression', *args, **kwargs)
+        self.sota = {
+            'rmse_mean': 4.36,
+            'rmse_std': 0.04,
+            'll_mean': -2.83,
+            'll_std': 0.02,
+            'reference': 'https://arxiv.org/pdf/1612.01474.pdf',
+        }
         df = pd.read_csv('data/protein_structure/protein_structure.csv')
         x = df.values[:, 1:].astype('float32')
         y = df.values[:, 0:1].astype('float32')

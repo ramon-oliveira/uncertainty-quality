@@ -25,7 +25,7 @@
         <thead>
             <tr>
                 <th>Metric</th>
-                <th>Gal</th>
+                <th>State of the art</th>
                 <th>Ours</th>
             </tr>
         </thead>
@@ -33,14 +33,14 @@
             <tr>
                 <%
                     import numpy as np
-                    gal = np.array([info['evaluations'][i]['rmse_test'] for i in range(len(info['evaluations']))])
+                    ours = np.array([info['evaluations'][i]['rmse_test'] for i in range(len(info['evaluations']))])
 
-                    gal_mean = np.mean(gal)
-                    gal_std = np.std(gal)
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
                 %>
                 <td>RMSE</td>
-                <td>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</td>
-                <td>NA</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                <td>${info['sota']['rmse_mean']} +/- ${info['sota']['rmse_std']}</td>
             </tr>
             <tr>
                 <%
@@ -65,21 +65,33 @@
             <tr>
                 <%
                     import numpy as np
-                    gal = np.array([info['evaluations'][i]['ll_tau'] for i in range(len(info['evaluations']))])
-                    ours = np.array([info['evaluations'][i]['ll_uncertainty'] for i in range(len(info['evaluations']))])
-
-                    gal_mean = np.mean(gal)
-                    gal_std = np.std(gal)
+                    ours = np.array([info['evaluations'][i]['ll_normal'] for i in range(len(info['evaluations']))])
                     ours_mean = np.mean(ours)
                     ours_std = np.std(ours)
                 %>
                 <td>likelihood</td>
-                % if gal_mean < ours_mean:
-                    <td>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</td>
+                % if info['sota']['ll_mean'] < ours_mean:
+                    <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
                     <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
                 % else:
-                    <td><b>${'{0:.4f}'.format(gal_mean)} +/- ${'{0:.4f}'.format(gal_std)}</b></td>
+                    <td><b>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</b></td>
                     <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % endif
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['ll_normal_uncertainty'] for i in range(len(info['evaluations']))])
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>likelihood</td>
+                % if info['sota']['ll_mean'] < ours_mean:
+                    <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
+                    <td>(Uncertainty)<br><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % else:
+                    <td><b>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</b></td>
+                    <td>(Uncertainty)<br>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
                 % endif
             </tr>
         </tbody>

@@ -26,7 +26,7 @@ def cfg():
     model_settings = {
         'name': 'mlp',
         'dropout': 0.05,
-        'layers': [100, 100],
+        'layers': [50],
         'epochs': 300,
         'batch_size': 100,
         'posterior_samples': 1000,
@@ -50,7 +50,6 @@ def evaluate(model, dataset):
 def run(model_settings, dataset_settings, num_experiments, _log):
     _log.info('dataset_settings: ' + str(dataset_settings))
     _log.info('model_settings: ' + str(model_settings))
-
     ex.info['evaluations'] = []
     for i in range(num_experiments):
         print('#'*10, 'Run', i+1, '#'*10)
@@ -59,3 +58,4 @@ def run(model_settings, dataset_settings, num_experiments, _log):
         model = models.load(model_settings)
         train(model, dataset)
         ex.info['evaluations'].append(evaluate(model, dataset))
+    ex.info['sota'] = dataset.sota

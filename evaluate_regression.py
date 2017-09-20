@@ -165,6 +165,15 @@ def evaluate(model, dataset):
         ll.append(norm.logpdf(x, loc=mean, scale=sigma))
     ll = np.array(ll)
     ll_test = np.mean(ll)
+    print('log-likelihood normal uncertainty:', ll_test)
+    info['ll_normal_uncertainty'] = ll_test
+
+    ll = []
+    for x, mean, log_std in zip(y_pred[:, 0], y_true[:, 0], y_pred[:, 1]):
+        sigma = np.exp(log_std)
+        ll.append(norm.logpdf(x, loc=mean, scale=sigma))
+    ll = np.array(ll)
+    ll_test = np.mean(ll)
     print('log-likelihood normal:', ll_test)
     info['ll_normal'] = ll_test
 
