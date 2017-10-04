@@ -180,7 +180,7 @@ class Kin8nm(Dataset):
             'reference': 'https://arxiv.org/pdf/1612.01474.pdf',
         }
         df = pd.read_csv('data/kin8nm/kin8nm.csv', header=None)
-        df[9] = -1.0
+        df[9] = 0.0
         x = df.values[:, :8]
         y = df.values[:, 8:]
         x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1)

@@ -39,8 +39,13 @@
                     ours_std = np.std(ours)
                 %>
                 <td>RMSE</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
-                <td>${info['sota']['rmse_mean']} +/- ${info['sota']['rmse_std']}</td>
+                % if info['sota']['rmse_mean'] < ours_mean:
+                    <td><b>${info['sota']['rmse_mean']} +/- ${info['sota']['rmse_std']}</b></td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % else:
+                    <td>${info['sota']['rmse_mean']} +/- ${info['sota']['rmse_std']}</td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % endif
             </tr>
             <tr>
                 <%
@@ -69,7 +74,7 @@
                     ours_mean = np.mean(ours)
                     ours_std = np.std(ours)
                 %>
-                <td>likelihood</td>
+                <td>likelihood (using predicted variance)</td>
                 % if info['sota']['ll_mean'] < ours_mean:
                     <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
                     <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
@@ -85,13 +90,13 @@
                     ours_mean = np.mean(ours)
                     ours_std = np.std(ours)
                 %>
-                <td>likelihood</td>
+                <td>likelihood (using uncertainty)</td>
                 % if info['sota']['ll_mean'] < ours_mean:
                     <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
-                    <td>(Uncertainty)<br><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
                 % else:
                     <td><b>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</b></td>
-                    <td>(Uncertainty)<br>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
                 % endif
             </tr>
         </tbody>

@@ -20,16 +20,16 @@ def cfg():
     num_experiments = 10
 
     dataset_settings = {
-        'name': 'protein_structure',
+        'name': 'kin8nm',
     }
 
     model_settings = {
         'name': 'mlp',
         'dropout': 0.05,
-        'layers': [50],
-        'epochs': 300,
+        'layers': [50, 50],
+        'epochs': 500,
         'batch_size': 100,
-        'posterior_samples': 1000,
+        'posterior_samples': 100,
     }
 
 

@@ -54,12 +54,16 @@ def uncertainty_nll_gaussian_std(y_det_prob):
 
 
 def uncertainty_classifer(model, dataset, test_uncertainty):
-    x_val = np.vstack([dataset.x_train, dataset.x_val])
-    y_val = np.vstack([dataset.y_train, dataset.y_val])
-    # x_val, y_val = dataset.x_val, dataset.y_val
+    # x_val = np.vstack([dataset.x_train, dataset.x_val])
+    # y_val = np.vstack([dataset.y_train, dataset.y_val])
+    x_val, y_val = dataset.x_val, dataset.y_val
 
     y_deterministic = model.predict(x_val, probabilistic=False)
     y_probabilistic = model.predict(x_val, probabilistic=True)
+
+    y_true = dataset.yscaler.inverse_transform(y_val)
+    y_pred = dataset.yscaler.inverse_transform(y_probabilistic.mean(axis=0))
+    y_pred_det = dataset.yscaler.inverse_transform(y_deterministic)
 
     uncertainties = [
         ('uncertainty_std_predicted_mean', uncertainty_std_predicted_mean, (y_probabilistic)),
@@ -70,32 +74,42 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
         ('uncertainty_nll_gaussian_std', uncertainty_nll_gaussian_std, (y_deterministic, y_probabilistic)),
     ]
 
+    # use as input
     x = np.zeros([len(y_val), len(uncertainties) + dataset.output_size])
     x[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
+
     # use as target
-    y = np.abs(y_val[:, 0] - y_probabilistic.mean(axis=0)[:, 0])
+    # y = (y_true[:, 0] - y_pred[:, 0])**2
+    samples = []
+    for i in range(model.posterior_samples):
+        samples.append(dataset.yscaler.inverse_transform(y_probabilistic[i]))
+    samples = np.array(samples)
+    y = []
+    for i in range(len(y_true)):
+        y.append(np.std(samples[:, i, 0])**2)
+    y = np.array(y)
 
     for i, (name, func, y_score) in enumerate(uncertainties):
         uncertainty = func(y_score)
         x[:, i] = uncertainty
 
-    poly = PolynomialFeatures(2).fit(x)
-    x = poly.transform(x)
+    # poly = PolynomialFeatures(2).fit(x)
+    # x = poly.transform(x)
     xscaler = StandardScaler().fit(x)
     yscaler = StandardScaler().fit(y.reshape(-1, 1))
     x = xscaler.transform(x)
     y = yscaler.transform(y.reshape(-1, 1))
 
-    params = {
-        'n_estimators': [100, 200],
-        'learning_rate': [0.1, 0.01],
-        'max_depth': [2, 3, 4],
-    }
+    # params = {
+    #     'n_estimators': [100, 200],
+    #     'learning_rate': [0.1, 0.01],
+    #     'max_depth': [2, 3, 4],
+    # }
     # rg = GridSearchCV(RandomForestRegressor(), params, scoring='neg_mean_squared_error', n_jobs=3).fit(x, y)
     # rg = RandomizedSearchCV(xgb.XGBRegressor(), params, scoring='neg_mean_squared_error', n_jobs=3).fit(x, y)
-    # rg = xgb.XGBRegressor().fit(x, y)
-    rg = linear_model.RidgeCV(alphas=np.linspace(0.01, 10, 100), scoring='neg_mean_squared_error').fit(x, y)
-    test_uncertainty = poly.transform(test_uncertainty)
+    rg = xgb.XGBRegressor().fit(x, y)
+    # rg = linear_model.RidgeCV(alphas=np.linspace(0.01, 10, 100), cv=10, scoring='neg_mean_squared_error').fit(x, y)
+    # test_uncertainty = poly.transform(test_uncertainty)
     test_uncertainty = xscaler.transform(test_uncertainty)
     uncertainty = yscaler.inverse_transform(rg.predict(test_uncertainty)).ravel()
     return uncertainty
@@ -177,36 +191,20 @@ def evaluate(model, dataset):
     print('log-likelihood normal:', ll_test)
     info['ll_normal'] = ll_test
 
+    y_hat = np.array([dataset.yscaler.inverse_transform(y_probabilistic[i]) for i in range(model.posterior_samples)])
     tau = 0.159707652696 # obtained from BO
-    ll = (logsumexp(-0.5 * tau * (y_true[:, 0] - y_pred[:, 0])**2, axis=0) - np.log(model.posterior_samples)
-          - 0.5*np.log(2*np.pi) - 0.5*np.log(tau))
+    ll = [(logsumexp(-0.5 * tau * (y_true[i, 0] - y_hat[:, i, 0])**2, axis=0) - np.log(model.posterior_samples)
+          - 0.5*np.log(2*np.pi) - 0.5*np.log(tau)) for i in range(len(y_true))]
     ll_test = np.mean(ll)
     print('log-likelihood tau:', ll_test)
     info['ll_tau'] = ll_test
 
     tau = uncertainty
     tau[tau <= 0] = 1e-6
-    ll = (logsumexp(-0.5 * tau * (y_true[:, 0] - y_pred[:, 0])**2, axis=0) - np.log(model.posterior_samples)
-          - 0.5*np.log(2*np.pi) - 0.5*np.log(tau))
+    ll = [(logsumexp(-0.5 * tau[i] * (y_true[i, 0] - y_hat[:, i, 0])**2, axis=0) - np.log(model.posterior_samples)
+          - 0.5*np.log(2*np.pi) - 0.5*np.log(tau[i])) for i in range(len(y_true))]
     ll_test = np.mean(ll)
     print('log-likelihood uncertainty:', ll_test)
     info['ll_uncertainty'] = ll_test
-
-    var = np.exp(y_pred[:, 1])**2
-    # var[var <= 0] = 1e-4
-    ll_test = np.mean(-0.5 * np.log(2 * np.pi * var) - \
-              0.5 * (y_true[:, 0] - y_pred[:, 0])**2 / var)
-
-    print('log-likelihood ryan var:', ll_test)
-    info['ll_ryan_var'] = ll_test
-
-    var = np.sqrt(uncertainty) #np.exp(y_pred[:, 1])**2
-    # var[var <= 0] = 1e-4
-    ll_test = np.mean(-0.5 * np.log(2 * np.pi * var) - \
-              0.5 * (y_true[:, 0] - y_pred[:, 0])**2 / var)
-
-    print('log-likelihood ryan uncertainty:', ll_test)
-    info['ll_ryan_rg'] = ll_test
-
 
     return info

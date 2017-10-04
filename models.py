@@ -82,22 +82,22 @@ class MLP(BaseModel):
         model = Sequential()
         model.add(Dense(layers[0], input_shape=dataset.input_shape))
         model.add(Dropout(dropout))
-        model.add(Activation('relu'))
+        model.add(Activation('selu'))
         for units in layers[1:]:
             model.add(Dense(units))
             model.add(Dropout(dropout))
-            model.add(Activation('relu'))
+            model.add(Activation('selu'))
         model.add(Dense(dataset.output_size))
 
         # probabilistic model
         probabilistic_model = Sequential()
         probabilistic_model.add(Dense(layers[0], input_shape=dataset.input_shape))
         probabilistic_model.add(BayesianDropout(dropout))
-        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(Activation('selu'))
         for units in layers[1:]:
             probabilistic_model.add(Dense(units))
             probabilistic_model.add(BayesianDropout(dropout))
-            probabilistic_model.add(Activation('relu'))
+            probabilistic_model.add(Activation('selu'))
         probabilistic_model.add(Dense(dataset.output_size))
 
         opt = optimizers.Nadam()
