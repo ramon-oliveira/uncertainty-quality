@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--Let browser know website is optimized for mobile-->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <!--Import Google Icon Font-->
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <!--Import materialize.css-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-0.12.9.min.css" rel="stylesheet" type="text/css">
+  <link href="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.9.min.css" rel="stylesheet" type="text/css">
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.9.min.js"></script>
+  <script src="http://cdn.pydata.org/bokeh/release/bokeh-widgets-0.12.9.min.js"></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+<div class="card-content">
+    <h3>Dataset: ${config['dataset_settings']['name']}</h3>
+    <table class="bordered">
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Sota</th>
+                <th>Ours</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['accuracy_test'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>Accuracy</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                <td>--</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+
+<%
+import numpy as np
+from bokeh.plotting import figure
+from bokeh import embed
+from bokeh.palettes import Category20_20
+colors = Category20_20
+
+c = 0
+p = figure(title='CNN - '+ config['dataset_settings']['name'], plot_width=800, plot_height=600)
+for k in sorted(info['evaluations'][0].keys()):
+    if not k.startswith('uncertainty') or k.endswith('auc'): continue
+    xys = np.array([info['evaluations'][i][k] for i in range(len(info['evaluations']))])
+    xs = np.mean(xys, axis=0)[:, 0]
+    ys = np.mean(xys, axis=0)[:, 1]
+    stds = np.std(xys, axis=0)[:, 1]
+
+    # Bollinger shading glyph:
+    auc = np.array([info['evaluations'][i][k+'_auc'] for i in range(len(info['evaluations']))])
+    auc = np.mean(auc)
+    band_x = np.append(xs, xs[::-1])
+    band_y = np.append(ys - stds, (ys + stds)[::-1])
+    p.patch(band_x, band_y, color=colors[c], fill_alpha=0.2)
+    p.line(xs, ys, legend='{0}: {1:.5f}'.format(k, auc), color=colors[c], line_width=3)
+    c += 1
+
+p.xaxis.axis_label = 'data proportion'
+p.yaxis.axis_label = 'RMSE'
+p.legend.location = 'bottom_right'
+
+chart_script, chart_div = embed.components(p)
+
+%>
+
+<div class="container">
+<div class="card">
+<div class="card-content">
+    <h5>Uncertainty metrics</h5>
+    ${chart_script}
+    ${chart_div}
+</div>
+</div>
+</div>
+
+<div class="container">
+    <div class="row">
+    % for example in info['evaluations'][0]['examples']:
+        <div class="col s1">
+            <span>True: ${example['true']}</span><br>
+            <span>Predicted: ${example['predicted']}</span><br>
+            <span>Uncertainty: ${'{0:.4f}'.format(example['uncertainty'])}</span>
+            <img width="100%" height="100%" src="data:image/png;base64, ${str(example['base64'])[2:-1]}">
+        </div>
+    % endfor
+    </div>
+</div>
+
+<%
+def to_str(v):
+  if type(v) is float:
+    return '{0:.2f}'.format(v)
+  return v
+%>
+
+<%
+  from dateutil import parser
+
+  start_time = parser.parse(run['start_time'])
+  stop_time = parser.parse(run['stop_time'])
+  elapsed = stop_time - start_time
+  seconds = int(elapsed.total_seconds())
+%>
+
+  <div class="container">
+      <div class='row'>
+          <div class="col s6">
+              <div class="card blue-grey darken-1">
+                  <div class="card-content white-text">
+                      <h5>Experiment</h5>
+                      <table class="bordered">
+                          <tbody>
+                              <tr>
+                                  <td><b>Name</b></td>
+                                  <td>${run['experiment']['name']}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Result</b></td>
+                                  <td>${run.get('result')}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Start time</b></td>
+                                  <td>${start_time.strftime('%d/%m/%Y %H:%M:%S')}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Stop time</b></td>
+                                  <td>${stop_time.strftime('%d/%m/%Y %H:%M:%S')}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Elapsed time</b></td>
+                                  <td>${seconds} seconds</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Dependencies</b></td>
+                                  <td>
+                                      <ul>
+                                          % for d in run['experiment']['dependencies']:
+                                          <li>${d}</li>
+                                          % endfor
+                                      </ul>
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td><b>CPU</b></td>
+                                  <td>${run['host']['cpu']}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>OS</b></td>
+                                  <td>${run['host']['os'][1]}</td>
+                              </tr>
+                              <tr>
+                                  <td><b>Python Version</b></td>
+                                  <td>${run['host']['python_version']}</td>
+                              </tr>
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+
+          <div class="col s6">
+              <div class="card blue-grey darken-1">
+                  <div class="card-content white-text">
+                      <h5>Config</h5>
+                      <table class="bordered">
+                          <tbody>
+                              % for k, v in sorted(config.items()):
+                              <tr>
+                                  <td><b>${k}</b></td>
+                                  % if type(v) is not str or len(v) < 30:
+                                  <td>${v}</td>
+                                  % else:
+                                  <td>${v[:30]}...</td>
+                                  % endif
+                              </tr>
+                              % endfor
+                          </tbody>
+                      </table>
+                  </div>
+              </div>
+          </div>
+
+      </div>
+  </div>
+
+
+
+  <!--Import jQuery before materialize.js-->
+
+</body>
+
+</html>

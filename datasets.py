@@ -16,6 +16,7 @@ class Dataset(object):
 
     def __init__(self, type):
         self.type = type
+        self.sota = {}
 
 
 class MNIST(Dataset):
@@ -51,6 +52,8 @@ class CIFAR10(Dataset):
     def __init__(self, *args, **kwargs):
         super(CIFAR10, self).__init__('classification', *args, **kwargs)
         (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+        x_train = x_train/255
+        x_test = x_test/255
 
         y_train = np.eye(10)[y_train.ravel()]
         y_test = np.eye(10)[y_test.ravel()]

@@ -11,7 +11,7 @@ import evaluate_regression
 
 ex = Experiment('uncertainty-quality')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
-ex.observers.append(FileStorageObserver.create('runs/', template='template_regression.html'))
+ex.observers.append(FileStorageObserver.create('runs/', template='template_classification.html'))
 
 
 @ex.config
@@ -20,14 +20,12 @@ def cfg():
     num_experiments = 10
 
     dataset_settings = {
-        'name': 'kin8nm',
+        'name': 'cfiar10',
     }
 
     model_settings = {
-        'name': 'mlp',
-        'dropout': 0.05,
-        'layers': [50, 50],
-        'epochs': 500,
+        'name': 'cnn',
+        'epochs': 300,
         'batch_size': 100,
         'posterior_samples': 100,
     }

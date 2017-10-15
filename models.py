@@ -145,9 +145,7 @@ class CNN(BaseModel):
         model.add(Dropout(0.5))
         model.add(Dense(dataset.output_size))
         model.add(Activation('softmax'))
-        # opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
-        # opt = optimizers.adam()
-        opt = optimizers.sgd(lr=0.0001)
+        opt = optimizers.Adam()
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
@@ -170,9 +168,7 @@ class CNN(BaseModel):
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(dataset.output_size))
         probabilistic_model.add(Activation('softmax'))
-        # opt = optimizers.rmsprop(lr=0.0001, decay=1e-6)
-        # opt = optimizers.adam()
-        opt = optimizers.sgd(lr=0.0001)
+        opt = optimizers.Adam()
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 

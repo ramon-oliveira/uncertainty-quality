@@ -1,6 +1,9 @@
 import numpy as np
 import xgboost as xgb
 from scipy.stats import entropy
+import base64
+from PIL import Image
+import io
 
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
@@ -63,7 +66,8 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
     return clf.predict_proba(test_uncertainty)[:, 1]
 
 
-def evaluate(ex, model, dataset):
+def evaluate(model, dataset):
+    info = {}
     x_test, y_test = dataset.x_test, dataset.y_test.argmax(axis=1)
 
     y_deterministic = model.predict(x_test, probabilistic=False)
@@ -71,7 +75,7 @@ def evaluate(ex, model, dataset):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
 
     acc_test = (y_test == y_pred).mean()
-    ex.info['accuracy_test'] = acc_test
+    info['accuracy_test'] = acc_test
     print('test accuracy: {0:.4f}'.format(acc_test))
 
     uncertainties = [
@@ -92,15 +96,56 @@ def evaluate(ex, model, dataset):
             prop = end/len(y_hat)
             acc = (l[:end, 1] == l[:end, 2]).mean()
             prop_acc.append([prop, acc])
-        ex.info[name] = prop_acc
+        info[name] = prop_acc
+        auc = np.trapz(y=np.array(prop_acc)[:, 1], x=np.array(prop_acc)[:, 0])
+        info[name+'_auc'] = auc
 
         test_uncertainty[:, i] = uncertainty
 
     uncertainty = uncertainty_classifer(model, dataset, test_uncertainty)
-    l = np.array(sorted(zip(uncertainty, y_test, y_pred)))
+    l = np.array(sorted(zip(uncertainty, y_test, y_pred, np.arange(len(y_test), dtype='int'))))
     prop_acc = []
     for end in range(50, len(y_pred), 20):
         prop = end/len(y_pred)
         acc = (l[:end, 1] == l[:end, 2]).mean()
         prop_acc.append([prop, acc])
-    ex.info['uncertainty_classifer'] = prop_acc
+    info['uncertainty_classifer'] = prop_acc
+    auc = np.trapz(y=np.array(prop_acc)[:, 1], x=np.array(prop_acc)[:, 0])
+    info['uncertainty_classifer_auc'] = auc
+
+    classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+    examples = []
+    for i, (u, t, p, idx) in enumerate(l[:10]):
+        print(u, t, p, idx)
+        img = x_test[int(idx)]*255
+        img = img.astype('uint8')
+        img = Image.fromarray(img, 'RGB')
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        img_str = base64.b64encode(buffer.getvalue())
+        examples.append({
+            'uncertainty': u,
+            'true': classes[int(t)],
+            'predicted': classes[int(p)],
+            'base64': img_str
+        })
+
+    for i, (u, t, p, idx) in enumerate(l[-10:], start=3):
+        print(u, t, p, idx)
+        img = x_test[int(idx)]*255
+        img = img.astype('uint8')
+        img = Image.fromarray(img, 'RGB')
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        img_str = base64.b64encode(buffer.getvalue())
+        examples.append({
+            'uncertainty': u,
+            'true': classes[int(t)],
+            'predicted': classes[int(p)],
+            'base64': img_str
+        })
+
+    info['examples'] = examples
+
+    return info
