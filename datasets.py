@@ -37,6 +37,7 @@ class MNIST(Dataset):
 
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
+        self.classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
         split = 50000
         self.x_train = x_train[:split]
@@ -60,6 +61,7 @@ class CIFAR10(Dataset):
 
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
+        self.classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 
         split = 42000
         self.x_train = x_train[:split]

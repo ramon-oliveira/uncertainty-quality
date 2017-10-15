@@ -113,14 +113,17 @@ def evaluate(model, dataset):
     auc = np.trapz(y=np.array(prop_acc)[:, 1], x=np.array(prop_acc)[:, 0])
     info['uncertainty_classifer_auc'] = auc
 
-    classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    classes = dataset.classes
 
     examples = []
     for i, (u, t, p, idx) in enumerate(l[:10]):
         print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
-        img = Image.fromarray(img, 'RGB')
+        if img.shape[-1] == 1:
+            img = Image.fromarray(img.squeeze())
+        else:
+            img = Image.fromarray(img, 'RGB')
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
         img_str = base64.b64encode(buffer.getvalue())
@@ -135,7 +138,10 @@ def evaluate(model, dataset):
         print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
-        img = Image.fromarray(img, 'RGB')
+        if img.shape[-1] == 1:
+            img = Image.fromarray(img.squeeze())
+        else:
+            img = Image.fromarray(img, 'RGB')
         buffer = io.BytesIO()
         img.save(buffer, format="PNG")
         img_str = base64.b64encode(buffer.getvalue())

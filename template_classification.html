@@ -94,10 +94,10 @@ chart_script, chart_div = embed.components(p)
 <div class="container">
     <div class="row">
     % for example in info['evaluations'][0]['examples']:
-        <div class="col s1">
+        <div class="col s2">
             <span>True: ${example['true']}</span><br>
-            <span>Predicted: ${example['predicted']}</span><br>
-            <span>Uncertainty: ${'{0:.4f}'.format(example['uncertainty'])}</span>
+            <span>Pred: ${example['predicted']}</span><br>
+            <span>Uncer: ${'{0:.4f}'.format(example['uncertainty'])}</span>
             <img width="100%" height="100%" src="data:image/png;base64, ${str(example['base64'])[2:-1]}">
         </div>
     % endfor

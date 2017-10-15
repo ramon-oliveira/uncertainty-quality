@@ -20,7 +20,7 @@ def cfg():
     num_experiments = 10
 
     dataset_settings = {
-        'name': 'cfiar10',
+        'name': 'cifar10',
     }
 
     model_settings = {
