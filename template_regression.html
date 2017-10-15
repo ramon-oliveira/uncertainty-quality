@@ -99,6 +99,41 @@
                     <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
                 % endif
             </tr>
+
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['ll_tau'] for i in range(len(info['evaluations']))])
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>likelihood tau (using tau gal)</td>
+                % if info['sota']['ll_mean'] < ours_mean:
+                    <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % else:
+                    <td><b>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</b></td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % endif
+            </tr>
+
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['ll_uncertainty'] for i in range(len(info['evaluations']))])
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>likelihood tau (using uncertainty)</td>
+                % if info['sota']['ll_mean'] < ours_mean:
+                    <td>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</td>
+                    <td><b>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</b></td>
+                % else:
+                    <td><b>${'{0:.4f}'.format(info['sota']['ll_mean'])} +/- ${'{0:.4f}'.format(info['sota']['ll_std'])}</b></td>
+                    <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
+                % endif
+            </tr>
+
         </tbody>
     </table>
 </div>
