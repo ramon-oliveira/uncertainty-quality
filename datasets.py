@@ -8,7 +8,7 @@ from keras.datasets import mnist
 from keras.datasets import cifar10
 from keras.datasets import cifar100
 from keras.datasets import boston_housing
-# from keras.datasets import fashion_mnist
+from keras.datasets import fashion_mnist
 from keras.preprocessing.image import ImageDataGenerator
 import keras.backend as K
 import re
@@ -37,6 +37,10 @@ class MNIST(Dataset):
         y_train = np.eye(10)[y_train.ravel()]
         y_test = np.eye(10)[y_test.ravel()]
 
+        self.sota = {
+            'accuracy': 99.79,
+            'reference': 'http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html',
+        }
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
         self.classes = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -53,7 +57,7 @@ class MNIST(Dataset):
 class FashonMNIST(Dataset):
 
     def __init__(self, *args, **kwargs):
-        super(MNIST, self).__init__('classification', *args, **kwargs)
+        super(FashonMNIST, self).__init__('classification', *args, **kwargs)
         (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
 
         if K.image_data_format() == 'channels_first':
@@ -66,6 +70,10 @@ class FashonMNIST(Dataset):
         y_train = np.eye(10)[y_train.ravel()]
         y_test = np.eye(10)[y_test.ravel()]
 
+        self.sota = {
+            'accuracy': 0.967,
+            'reference': 'http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html',
+        }
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
 
@@ -92,6 +100,10 @@ class CIFAR10(Dataset):
         y_train = np.eye(10)[y_train.ravel()]
         y_test = np.eye(10)[y_test.ravel()]
 
+        self.sota = {
+            'accuracy': 96.53,
+            'reference': 'http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html',
+        }
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
         self.classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
@@ -116,25 +128,29 @@ class CIFAR100(Dataset):
         y_train = np.eye(100)[y_train.ravel()]
         y_test = np.eye(100)[y_test.ravel()]
 
+        self.sota = {
+            'accuracy': 75.72,
+            'reference': 'http://rodrigob.github.io/are_we_there_yet/build/classification_datasets_results.html',
+        }
         self.input_shape = x_train.shape[1:]
         self.output_size = 100
-        self.classes = ['beaver', 'dolphin', 'otter', 'seal', 'whale', 'aquarium fish',
-                        'flatfish', 'ray', 'shark', 'trout', 'orchids', 'poppies',
-                        'roses', 'sunflowers', 'tulips', 'bottles', 'bowls', 'cans',
-                        'cups', 'plates', 'apples', 'mushrooms', 'oranges', 'pears',
-                        'sweet peppers', 'clock', 'computer keyboard', 'lamp',
-                        'telephone', 'television', 'bed', 'chair', 'couch', 'table',
-                        'wardrobe', 'bee', 'beetle', 'butterfly', 'caterpillar',
-                        'cockroach', 'bear', 'leopard', 'lion', 'tiger', 'wolf',
-                        'bridge', 'castle', 'house', 'road', 'skyscraper', 'cloud',
-                        'forest', 'mountain', 'plain', 'sea', 'camel', 'cattle',
-                        'chimpanzee', 'elephant', 'kangaroo', 'fox', 'porcupine',
-                        'possum', 'raccoon', 'skunk', 'crab', 'lobster', 'snail',
-                        'spider', 'worm', 'baby', 'boy', 'girl', 'man', 'woman', 'crocodile',
-                        'dinosaur', 'lizard', 'snake', 'turtle', 'hamster', 'mouse',
-                        'rabbit', 'shrew', 'squirrel', 'maple', 'oak', 'palm', 'pine',
-                        'willow', 'bicycle', 'bus', 'motorcycle', 'pickup truck',
-                        'train', 'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor']
+        self.classes = ['apple', 'aquarium_fish', 'baby', 'bear', 'beaver', 'bed',
+                        'bee', 'beetle', 'bicycle', 'bottle', 'bowl', 'boy', 'bridge',
+                        'bus', 'butterfly', 'camel', 'can', 'castle', 'caterpillar',
+                        'cattle', 'chair', 'chimpanzee', 'clock', 'cloud', 'cockroach',
+                        'couch', 'crab', 'crocodile', 'cup', 'dinosaur', 'dolphin',
+                        'elephant', 'flatfish', 'forest', 'fox', 'girl', 'hamster',
+                        'house', 'kangaroo', 'keyboard', 'lamp', 'lawn_mower',
+                        'leopard', 'lion', 'lizard', 'lobster', 'man', 'maple_tree',
+                        'motorcycle', 'mountain', 'mouse', 'mushroom', 'oak_tree',
+                        'orange', 'orchid', 'otter', 'palm_tree', 'pear', 'pickup_truck',
+                        'pine_tree', 'plain', 'plate', 'poppy', 'porcupine', 'possum',
+                        'rabbit', 'raccoon', 'ray', 'road', 'rocket', 'rose', 'sea',
+                        'seal', 'shark', 'shrew', 'skunk', 'skyscraper', 'snail',
+                        'snake', 'spider', 'squirrel', 'streetcar', 'sunflower',
+                        'sweet_pepper', 'table', 'tank', 'telephone', 'television',
+                        'tiger', 'tractor', 'train', 'trout', 'tulip', 'turtle',
+                        'wardrobe', 'whale', 'willow_tree', 'wolf', 'woman', 'worm']
         print('classes:', len(self.classes))
 
         split = 42000

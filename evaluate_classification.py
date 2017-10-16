@@ -126,7 +126,6 @@ def evaluate(model, dataset):
     classes = dataset.classes
     examples = []
     for i, (u, t, p, idx) in enumerate(l[:12]):
-        print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
         if img.shape[-1] == 1:
@@ -144,7 +143,6 @@ def evaluate(model, dataset):
         })
 
     for i, (u, t, p, idx) in enumerate(l[-12:], start=3):
-        print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
         if img.shape[-1] == 1:

@@ -39,9 +39,49 @@
                     ours_std = np.std(ours)
                 %>
                 <td>Accuracy</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.4f}'.format(ours_std)}</td>
-                <td>--</td>
+                <td>${info['sota']['accuracy']}%</td>
+                <td>${'{0:.2f}'.format(ours_mean*100)}% +/- ${'{0:.2f}'.format(ours_std*100)}</td>
             </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['brier_prediction'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>Brier prediction</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)}% +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['brier_uncertainty'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>Brier uncertainty</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+            % for k in info['evaluations'][0].keys():
+                % if k.endswith('_auc'):
+                    <tr>
+                        <%
+                            import numpy as np
+                            ours = np.array([info['evaluations'][i][k] for i in range(len(info['evaluations']))])
+
+                            ours_mean = np.mean(ours)
+                            ours_std = np.std(ours)
+                        %>
+                        <td>${k}</td>
+                        <td>--</td>
+                        <td>${'{0:.2f}'.format(ours_mean*100)}% +/- ${'{0:.2f}'.format(ours_std*100)}</td>
+                    </tr>
+                % endif
+            % endfor
         </tbody>
     </table>
 </div>
@@ -97,7 +137,7 @@ chart_script, chart_div = embed.components(p)
         <div class="col s2">
             <span>True: ${example['true']}</span><br>
             <span>Pred: ${example['predicted']}</span><br>
-            <span>Uncer: ${'{0:.4f}'.format(example['uncertainty'])}</span>
+            <span>Uncer: ${'{0:.2f}'.format(example['uncertainty']*100)}%</span>
             <img width="100%" height="100%" src="data:image/png;base64, ${str(example['base64'])[2:-1]}">
         </div>
     % endfor
