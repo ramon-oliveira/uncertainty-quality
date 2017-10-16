@@ -74,7 +74,7 @@ for k in sorted(info['evaluations'][0].keys()):
     c += 1
 
 p.xaxis.axis_label = 'data proportion'
-p.yaxis.axis_label = 'RMSE'
+p.yaxis.axis_label = 'Accuracy'
 p.legend.location = 'bottom_right'
 
 chart_script, chart_div = embed.components(p)
