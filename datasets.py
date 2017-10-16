@@ -6,7 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from keras.datasets import mnist
 from keras.datasets import cifar10
+from keras.datasets import cifar100
 from keras.datasets import boston_housing
+# from keras.datasets import fashion_mnist
 from keras.preprocessing.image import ImageDataGenerator
 import keras.backend as K
 import re
@@ -48,6 +50,37 @@ class MNIST(Dataset):
         self.y_test = y_test
 
 
+class FashonMNIST(Dataset):
+
+    def __init__(self, *args, **kwargs):
+        super(MNIST, self).__init__('classification', *args, **kwargs)
+        (x_train, y_train), (x_test, y_test) = fashion_mnist.load_data()
+
+        if K.image_data_format() == 'channels_first':
+            x_train = x_train.reshape(-1, 1, 28, 28)/255
+            x_test = x_test.reshape(-1, 1, 28, 28)/255
+        else:
+            x_train = x_train.reshape(-1, 28, 28, 1)/255
+            x_test = x_test.reshape(-1, 28, 28, 1)/255
+
+        y_train = np.eye(10)[y_train.ravel()]
+        y_test = np.eye(10)[y_test.ravel()]
+
+        self.input_shape = x_train.shape[1:]
+        self.output_size = 10
+
+        self.classes = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat',
+                        'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+        split = 50000
+        self.x_train = x_train[:split]
+        self.y_train = y_train[:split]
+        self.x_val = x_train[split:]
+        self.y_val = y_train[split:]
+        self.x_test = x_test
+        self.y_test = y_test
+
+
 class CIFAR10(Dataset):
 
     def __init__(self, *args, **kwargs):
@@ -62,6 +95,47 @@ class CIFAR10(Dataset):
         self.input_shape = x_train.shape[1:]
         self.output_size = 10
         self.classes = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+
+        split = 42000
+        self.x_train = x_train[:split]
+        self.y_train = y_train[:split]
+        self.x_val = x_train[split:]
+        self.y_val = y_train[split:]
+        self.x_test = x_test
+        self.y_test = y_test
+
+
+class CIFAR100(Dataset):
+
+    def __init__(self, *args, **kwargs):
+        super(CIFAR100, self).__init__('classification', *args, **kwargs)
+        (x_train, y_train), (x_test, y_test) = cifar100.load_data()
+        x_train = x_train/255
+        x_test = x_test/255
+
+        y_train = np.eye(100)[y_train.ravel()]
+        y_test = np.eye(100)[y_test.ravel()]
+
+        self.input_shape = x_train.shape[1:]
+        self.output_size = 100
+        self.classes = ['beaver', 'dolphin', 'otter', 'seal', 'whale', 'aquarium fish',
+                        'flatfish', 'ray', 'shark', 'trout', 'orchids', 'poppies',
+                        'roses', 'sunflowers', 'tulips', 'bottles', 'bowls', 'cans',
+                        'cups', 'plates', 'apples', 'mushrooms', 'oranges', 'pears',
+                        'sweet peppers', 'clock', 'computer keyboard', 'lamp',
+                        'telephone', 'television', 'bed', 'chair', 'couch', 'table',
+                        'wardrobe', 'bee', 'beetle', 'butterfly', 'caterpillar',
+                        'cockroach', 'bear', 'leopard', 'lion', 'tiger', 'wolf',
+                        'bridge', 'castle', 'house', 'road', 'skyscraper', 'cloud',
+                        'forest', 'mountain', 'plain', 'sea', 'camel', 'cattle',
+                        'chimpanzee', 'elephant', 'kangaroo', 'fox', 'porcupine',
+                        'possum', 'raccoon', 'skunk', 'crab', 'lobster', 'snail',
+                        'spider', 'worm', 'baby', 'boy', 'girl', 'man', 'woman', 'crocodile',
+                        'dinosaur', 'lizard', 'snake', 'turtle', 'hamster', 'mouse',
+                        'rabbit', 'shrew', 'squirrel', 'maple', 'oak', 'palm', 'pine',
+                        'willow', 'bicycle', 'bus', 'motorcycle', 'pickup truck',
+                        'train', 'lawn-mower', 'rocket', 'streetcar', 'tank', 'tractor']
+        print('classes:', len(self.classes))
 
         split = 42000
         self.x_train = x_train[:split]
@@ -258,8 +332,12 @@ def load(settings):
         dataset = Digits(**settings)
     elif name == 'mnist':
         dataset = MNIST(**settings)
+    elif name == 'fashion_mnist':
+        dataset = FashonMNIST(**settings)
     elif name == 'cifar10':
         dataset = CIFAR10(**settings)
+    elif name == 'cifar100':
+        dataset = CIFAR100(**settings)
     elif name == 'melanoma':
         dataset = Melanoma(**settings)
     elif name == 'boston_housing':

@@ -4,6 +4,7 @@ from scipy.stats import entropy
 import base64
 from PIL import Image
 import io
+from sklearn import metrics
 
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
@@ -99,6 +100,7 @@ def evaluate(model, dataset):
         info[name] = prop_acc
         auc = np.trapz(y=np.array(prop_acc)[:, 1], x=np.array(prop_acc)[:, 0])
         info[name+'_auc'] = auc
+        print(name+'_auc:', auc)
 
         test_uncertainty[:, i] = uncertainty
 
@@ -112,11 +114,18 @@ def evaluate(model, dataset):
     info['uncertainty_classifer'] = prop_acc
     auc = np.trapz(y=np.array(prop_acc)[:, 1], x=np.array(prop_acc)[:, 0])
     info['uncertainty_classifer_auc'] = auc
+    print('uncertainty_classifer_auc:', auc)
+
+    brier_pred = metrics.brier_score_loss(y_true=(y_test == y_pred), y_prob=y_probabilistic.mean(axis=0).max(axis=1))
+    brier_unc = metrics.brier_score_loss(y_true=(y_test != y_pred), y_prob=uncertainty)
+    info['brier_prediction'] = brier_pred
+    info['brier_uncertainty'] = brier_unc
+    print('brier_prediction', brier_pred)
+    print('brier_uncertainty', brier_unc)
 
     classes = dataset.classes
-
     examples = []
-    for i, (u, t, p, idx) in enumerate(l[:10]):
+    for i, (u, t, p, idx) in enumerate(l[:12]):
         print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
@@ -134,7 +143,7 @@ def evaluate(model, dataset):
             'base64': img_str
         })
 
-    for i, (u, t, p, idx) in enumerate(l[-10:], start=3):
+    for i, (u, t, p, idx) in enumerate(l[-12:], start=3):
         print(u, t, p, idx)
         img = x_test[int(idx)]*255
         img = img.astype('uint8')
