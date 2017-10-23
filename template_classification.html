@@ -66,6 +66,30 @@
                 <td>--</td>
                 <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
             </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['auc_hendricks_softmax'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUC Hendricks softmax</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['auc_hendricks_uncertainty'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUC Hendricks uncertainty</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
             % for k in info['evaluations'][0].keys():
                 % if k.endswith('_auc'):
                     <tr>
