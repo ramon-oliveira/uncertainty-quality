@@ -123,6 +123,15 @@ def evaluate(model, dataset):
     print('brier_prediction', brier_pred)
     print('brier_uncertainty', brier_unc)
 
+    success = (y_test == y_pred)
+    proba = y_probabilistic.mean(axis=0).max(axis=1)
+    auc_hendricks_softmax = metrics.roc_auc_score(y_true=success, y_score=proba)
+    auc_hendricks_uncertainty = metrics.roc_auc_score(y_true=success, y_score=1-uncertainty)
+    info['auc_hendricks_softmax'] = auc_hendricks_softmax
+    info['auc_hendricks_uncertainty'] = auc_hendricks_uncertainty
+    print('auc_hendricks_softmax', auc_hendricks_softmax)
+    print('auc_hendricks_uncertainty', auc_hendricks_uncertainty)
+
     classes = dataset.classes
     examples = []
     for i, (u, t, p, idx) in enumerate(l[:12]):

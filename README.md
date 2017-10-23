@@ -3,21 +3,7 @@
 Experiments repository for Uncertainty quality paper
 
 ## Contributions
-    - No need to be Bayesian to obtain uncertainties
-    - New uncertainty estimator using classifier
-
-## Variation factors:
-1) Datasets:
-    - MNIST
-    - CIFAR10
-    - Melanoma
-    - Retinopathy*
-2) Inference:
-    - Maximum Likelihood (?)
-    - Dropout
-    - VI
-    - SGHMC*
-
+    - New uncertainty estimator using classifier or regressor
 
 ## Uncertainty metrics:
     - Entropy
@@ -32,20 +18,14 @@ Experiments repository for Uncertainty quality paper
 
 
 ## TODO:
-    - Fix test data generators
-        - Check test accuracy
-    - Variational Inference MLP
+    - [Leveraging uncertainty information from deep neural networks for disease detection](http://www.biorxiv.org/content/early/2016/10/28/084210)
+        - Run same network to collect our metrics
 
-# Applications
-
-- [Leveraging uncertainty information from deep neural networks for disease detection](http://www.biorxiv.org/content/early/2016/10/28/084210)
-    - Inappropriate baseline: comparation against random split
-- [Uncertainties in parameters estimated with neural networks: application to strong gravitational lensing](https://arxiv.org/abs/1708.08843)
-    - Comparation against itself
-    - No baseline
-- [Modelling Uncertainty in Deep Learning for Camera Relocalization](https://arxiv.org/pdf/1509.05909.pdf)
-> **A non-Bayesian system which
-outputs point estimates does not interpret if the model is
-making sensible predictions or just guessing at random.**
-By measuring uncertainty we can understand with what
-confidence we can trust the prediction.
+## Related work
+    - [A Baseline for Detecting Misclassified and Out-of-Distribution Examples in Neural Networks](https://arxiv.org/abs/1610.02136)
+        - Works only for classification
+        - Metrics are AUCROC and AUPR (for correctly incorrectly classified examples) using max probability from softmax
+        - The proposed Abnormality detection (with auxiliary decoders) works only for in-out distribution detection
+    - [Leveraging uncertainty information from deep neural networks for disease detection](http://www.biorxiv.org/content/early/2016/10/28/084210)
+    - [Uncertainties in parameters estimated with neural networks: application to strong gravitational lensing](https://arxiv.org/abs/1708.08843)
+    - [Modelling Uncertainty in Deep Learning for Camera Relocalization](https://arxiv.org/pdf/1509.05909.pdf)
