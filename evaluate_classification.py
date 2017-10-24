@@ -20,7 +20,7 @@ def uncertainty_mean_argmax(y_probabilistic):
     y_mean = np.array([y_probabilistic[:, i, c].mean()
                       for i, c in enumerate(y_pred)])
 
-    return y_pred, y_mean
+    return y_pred, 1 - y_mean
 
 
 def uncertainty_std_mean(y_probabilistic):
