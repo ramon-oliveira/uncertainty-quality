@@ -90,6 +90,58 @@
                 <td>--</td>
                 <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
             </tr>
+
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['aupr_hendricks_softmax_success'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUPR Hendricks softmax Sucess</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['aupr_hendricks_uncertainty_success'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUPR Hendricks uncertainty Sucess</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['aupr_hendricks_softmax_fail'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUPR Hendricks softmax Fail</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+            <tr>
+                <%
+                    import numpy as np
+                    ours = np.array([info['evaluations'][i]['aupr_hendricks_uncertainty_fail'] for i in range(len(info['evaluations']))])
+
+                    ours_mean = np.mean(ours)
+                    ours_std = np.std(ours)
+                %>
+                <td>AUPR Hendricks uncertainty Fail</td>
+                <td>--</td>
+                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
+            </tr>
+
+
             % for k in info['evaluations'][0].keys():
                 % if k.endswith('_auc'):
                     <tr>

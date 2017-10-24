@@ -6,12 +6,21 @@ from PIL import Image
 import io
 from sklearn import metrics
 
+
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
     y_std = np.array([y_probabilistic[:, i, c].std()
                       for i, c in enumerate(y_pred)])
 
     return y_pred, y_std
+
+
+def uncertainty_mean_argmax(y_probabilistic):
+    y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
+    y_mean = np.array([y_probabilistic[:, i, c].mean()
+                      for i, c in enumerate(y_pred)])
+
+    return y_pred, y_mean
 
 
 def uncertainty_std_mean(y_probabilistic):
@@ -50,6 +59,7 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
 
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
+        ('uncertainty_mean_argmax', uncertainty_mean_argmax, y_probabilistic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
         ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
@@ -81,6 +91,7 @@ def evaluate(model, dataset):
 
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
+        ('uncertainty_mean_argmax', uncertainty_mean_argmax, y_probabilistic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
         ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
@@ -131,6 +142,27 @@ def evaluate(model, dataset):
     info['auc_hendricks_uncertainty'] = auc_hendricks_uncertainty
     print('auc_hendricks_softmax', auc_hendricks_softmax)
     print('auc_hendricks_uncertainty', auc_hendricks_uncertainty)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=proba)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_softmax_success'] = aupr
+    print('aupr_hendricks_softmax_success', aupr)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=1-uncertainty)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_uncertainty_success'] = aupr
+    print('aupr_hendricks_uncertainty_success', aupr)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=proba*-1)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_softmax_fail'] = aupr
+    print('aupr_hendricks_softmax_fail', aupr)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=(1-uncertainty)*-1)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_uncertainty_fail'] = aupr
+    print('aupr_hendricks_uncertainty_fail', aupr)
+
 
     classes = dataset.classes
     examples = []
