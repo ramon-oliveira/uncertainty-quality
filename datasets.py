@@ -11,6 +11,7 @@ from keras.datasets import boston_housing
 from keras.datasets import fashion_mnist
 from keras.preprocessing.image import ImageDataGenerator
 import keras.backend as K
+from scipy.misc import imresize
 import re
 
 
@@ -122,6 +123,21 @@ class CIFAR100(Dataset):
     def __init__(self, *args, **kwargs):
         super(CIFAR100, self).__init__('classification', *args, **kwargs)
         (x_train, y_train), (x_test, y_test) = cifar100.load_data()
+
+        # print('before', x_train.shape)
+        # imgs = []
+        # for img in tqdm.tqdm(x_train, desc='Resizing train'):
+        #     imgs.append(imresize(img, size=2.0))
+        # x_train = np.array(imgs)
+        # print('after', x_train.shape)
+        #
+        # print('before', x_test.shape)
+        # imgs = []
+        # for img in tqdm.tqdm(x_test, desc='Resizing test'):
+        #     imgs.append(imresize(img, size=2.0))
+        # x_test = np.array(imgs)
+        # print('after', x_test.shape)
+
         x_train = x_train/255
         x_test = x_test/255
 

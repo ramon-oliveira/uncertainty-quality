@@ -17,7 +17,7 @@ ex.observers.append(FileStorageObserver.create('runs/', template='template_class
 @ex.config
 def cfg():
     seed = 1337
-    num_experiments = 5
+    num_experiments = 3
 
     dataset_settings = {
         'name': 'cifar100',
@@ -25,7 +25,7 @@ def cfg():
 
     model_settings = {
         'name': 'cnn',
-        'epochs': 300,
+        'epochs': 500,
         'batch_size': 100,
         'posterior_samples': 100,
     }
