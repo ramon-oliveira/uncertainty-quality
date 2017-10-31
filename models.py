@@ -11,6 +11,8 @@ from keras.layers import Dropout
 from keras.layers import Lambda
 from keras.layers import Conv2D
 from keras.layers import MaxPooling2D
+from keras.layers import AveragePooling2D
+from keras.layers import BatchNormalization
 from keras.layers import Flatten
 from keras import optimizers
 from keras.regularizers import l2
@@ -126,38 +128,33 @@ class CNN(BaseModel):
     def __init__(self, dataset, *args, **kwargs):
         super(CNN, self).__init__(*args, **kwargs)
 
+        # deterministic model
         model = Sequential()
         model.add(Conv2D(32, (3, 3), padding='same', input_shape=dataset.input_shape))
         model.add(Activation('relu'))
         model.add(Conv2D(32, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.25))
+
         model.add(Conv2D(64, (3, 3), padding='same'))
         model.add(Activation('relu'))
         model.add(Conv2D(64, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.5))
-        model.add(Conv2D(128, (3, 3), padding='same'))
-        model.add(Activation('relu'))
-        model.add(Conv2D(128, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.25))
+
         model.add(Flatten())
         model.add(Dense(512))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
-        # model.add(Dense(512))
-        # model.add(Activation('relu'))
-        # model.add(Dropout(0.5))
         model.add(Dense(dataset.output_size))
         model.add(Activation('softmax'))
         opt = optimizers.Adam()
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
+        # probabilistic model
         probabilistic_model = Sequential()
         probabilistic_model.add(Conv2D(32, (3, 3), padding='same', input_shape=dataset.input_shape))
         probabilistic_model.add(Activation('relu'))
@@ -165,28 +162,80 @@ class CNN(BaseModel):
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
         probabilistic_model.add(BayesianDropout(0.25))
+
         probabilistic_model.add(Conv2D(64, (3, 3), padding='same'))
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(Conv2D(64, (3, 3)))
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
         probabilistic_model.add(BayesianDropout(0.25))
-        probabilistic_model.add(Conv2D(128, (3, 3), padding='same'))
-        probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(Conv2D(128, (3, 3)))
-        probabilistic_model.add(Activation('relu'))
-        probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
-        probabilistic_model.add(BayesianDropout(0.25))
+
         probabilistic_model.add(Flatten())
         probabilistic_model.add(Dense(512))
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(BayesianDropout(0.5))
-        # probabilistic_model.add(Dense(512))
-        # probabilistic_model.add(Activation('relu'))
-        # probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(dataset.output_size))
         probabilistic_model.add(Activation('softmax'))
         opt = optimizers.Adam()
+        probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        self.probabilistic_model = probabilistic_model
+
+
+class VGGTOP(BaseModel):
+
+    def __init__(self, dataset, *args, **kwargs):
+        super(VGGTOP, self).__init__(*args, **kwargs)
+
+        cfg = {
+            'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+            'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
+            'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
+            'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
+        }
+
+        # deterministic model
+        model = Sequential()
+        model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
+        for x in cfg['VGG11'][1:]:
+            if x == 'M':
+                model.add(MaxPooling2D(pool_size=(2, 2)))
+            else:
+                model.add(Conv2D(x, (3, 3), padding='same'))
+                # model.add(BatchNormalization())
+                model.add(Activation('relu'))
+                model.add(Dropout(0.25))
+        model.add(AveragePooling2D(pool_size=(1, 1)))
+
+        model.add(Flatten())
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(dataset.output_size))
+        model.add(Activation('softmax'))
+        opt = optimizers.SGD(lr=0.1, momentum=0.9, decay=5e-4)
+        model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
+        self.model = model
+
+        # probabilistic model
+        probabilistic_model = Sequential()
+        probabilistic_model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
+        for x in cfg['VGG16'][1:]:
+            if x == 'M':
+                probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
+            else:
+                probabilistic_model.add(Conv2D(x, (3, 3), padding='same'))
+                # probabilistic_model.add(BatchNormalization())
+                probabilistic_model.add(Activation('relu'))
+                probabilistic_model.add(BayesianDropout(0.25))
+        probabilistic_model.add(AveragePooling2D(pool_size=(1, 1)))
+
+        probabilistic_model.add(Flatten())
+        probabilistic_model.add(Dense(512))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(BayesianDropout(0.5))
+        probabilistic_model.add(Dense(dataset.output_size))
+        probabilistic_model.add(Activation('softmax'))
+        opt = optimizers.SGD(lr=0.1, momentum=0.9, decay=5e-4)
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
@@ -230,6 +279,8 @@ def load(settings):
         model = CNN(**settings)
     elif name == 'vgg':
         model = VGG(**settings)
+    elif name == 'vggtop':
+        model = VGGTOP(**settings)
     else:
         raise Exception('Unknown model {0}'.format(name))
 

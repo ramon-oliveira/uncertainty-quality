@@ -7,6 +7,17 @@ import io
 from sklearn import metrics
 
 
+def top_n(y_true, y_score, n=5):
+    y_pred = np.argsort(y_score, axis=1)[:, -n:]
+    acc = []
+    for t, p in zip(y_true, y_pred):
+        if t in p:
+            acc.append(1)
+        else:
+            acc.append(0)
+    return np.array(acc)
+
+
 def uncertainty_std_argmax(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
     y_std = np.array([y_probabilistic[:, i, c].std()
@@ -68,7 +79,8 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
 
     x = np.zeros([len(y_val), len(uncertainties) + dataset.output_size])
     x[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
-    y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
+    #y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
+    y = 1 - top_n(y_val, y_probabilistic.mean(axis=0))
     for i, (name, func, y_score) in enumerate(uncertainties):
         _, uncertainty = func(y_score)
         x[:, i] = uncertainty
@@ -127,23 +139,25 @@ def evaluate(model, dataset):
     info['uncertainty_classifer_auc'] = auc
     print('uncertainty_classifer_auc:', auc)
 
-    brier_pred = metrics.brier_score_loss(y_true=(y_test == y_pred), y_prob=y_probabilistic.mean(axis=0).max(axis=1))
-    brier_unc = metrics.brier_score_loss(y_true=(y_test != y_pred), y_prob=uncertainty)
+    #success = (y_test == y_pred)
+    success = top_n(y_test, y_probabilistic.mean(axis=0))
+    max_proba = y_probabilistic.mean(axis=0).max(axis=1)
+
+    brier_pred = metrics.brier_score_loss(y_true=success, y_prob=max_proba)
+    brier_unc = metrics.brier_score_loss(y_true=success, y_prob=1-uncertainty)
     info['brier_prediction'] = brier_pred
     info['brier_uncertainty'] = brier_unc
     print('brier_prediction', brier_pred)
     print('brier_uncertainty', brier_unc)
 
-    success = (y_test == y_pred)
-    proba = y_probabilistic.mean(axis=0).max(axis=1)
-    auc_hendricks_softmax = metrics.roc_auc_score(y_true=success, y_score=proba)
+    auc_hendricks_softmax = metrics.roc_auc_score(y_true=success, y_score=max_proba)
     auc_hendricks_uncertainty = metrics.roc_auc_score(y_true=success, y_score=1-uncertainty)
     info['auc_hendricks_softmax'] = auc_hendricks_softmax
     info['auc_hendricks_uncertainty'] = auc_hendricks_uncertainty
     print('auc_hendricks_softmax', auc_hendricks_softmax)
     print('auc_hendricks_uncertainty', auc_hendricks_uncertainty)
 
-    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=proba)
+    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=max_proba)
     aupr = metrics.auc(recall, precision)
     info['aupr_hendricks_softmax_success'] = aupr
     print('aupr_hendricks_softmax_success', aupr)
@@ -153,7 +167,7 @@ def evaluate(model, dataset):
     info['aupr_hendricks_uncertainty_success'] = aupr
     print('aupr_hendricks_uncertainty_success', aupr)
 
-    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=proba*-1)
+    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=max_proba*-1)
     aupr = metrics.auc(recall, precision)
     info['aupr_hendricks_softmax_fail'] = aupr
     print('aupr_hendricks_softmax_fail', aupr)
