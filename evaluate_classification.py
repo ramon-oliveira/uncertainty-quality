@@ -176,7 +176,7 @@ def evaluate(model, dataset):
     print('--'*10, 'MAX PROBA DET', '--'*10)
     uncertainty_metrics(info, 'maxprobadet', success_det, 1 - y_deterministic.max(axis=1))
     print('--'*10, 'STD MAX PROBA', '--'*10)
-    uncertainty_metrics(info, 'stdmaxproba', success, 1 - std_max_proba)
+    uncertainty_metrics(info, 'stdmaxproba', success, std_max_proba)
     print('--'*10, 'ENTROPY', '--'*10)
     uncertainty_metrics(info, 'entropy', success_det, entropy_uncertainty)
     print('--'*10, 'STACKING', '--'*10)
