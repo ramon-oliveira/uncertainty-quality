@@ -22,6 +22,40 @@
 <div class="card-content">
     <h3>Dataset: ${config['dataset_settings']['name']}</h3>
     <table class="bordered">
+        <%
+            metrics = ['brier_', 'auc_hendricks_', 'aupr_hendricks_success_', 'aupr_hendricks_fail_']
+            estimates = ['stdmaxproba', 'maxproba', 'stacking']
+        %>
+        <thead>
+            <tr>
+                <th>Metric</th>
+                <th>Std max probability</th>
+                <th>Max probability</th>
+                <th>Stacking</th>
+            </tr>
+        </thead>
+        <tbody>
+            % for metric in metrics:
+            <tr>
+                <td>${metric}</td>
+                <%
+                    import numpy as np
+                    means = []
+                    stds = []
+                    for estimate in estimates:
+                        values = np.array([info['evaluations'][i][metric+estimate] for i in range(len(info['evaluations']))])
+                        means.append(np.mean(values))
+                        stds.append(np.std(values))
+                %>
+                % for mean, std in zip(means, stds):
+                    <td>${'{0:.4f} +/- {1:.2f}'.format(mean, std)}</td>
+                % endfor
+            </tr>
+            % endfor
+
+        </tbody>
+    </table>
+    <table class="bordered">
         <thead>
             <tr>
                 <th>Metric</th>
@@ -42,105 +76,6 @@
                 <td>${info['sota']['accuracy']}%</td>
                 <td>${'{0:.2f}'.format(ours_mean*100)}% +/- ${'{0:.2f}'.format(ours_std*100)}</td>
             </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['brier_prediction'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>Brier prediction</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)}% +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['brier_uncertainty'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>Brier uncertainty</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['auc_hendricks_softmax'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUC Hendricks softmax</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['auc_hendricks_uncertainty'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUC Hendricks uncertainty</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['aupr_hendricks_softmax_success'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUPR Hendricks softmax Sucess</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['aupr_hendricks_uncertainty_success'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUPR Hendricks uncertainty Sucess</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['aupr_hendricks_softmax_fail'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUPR Hendricks softmax Fail</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-            <tr>
-                <%
-                    import numpy as np
-                    ours = np.array([info['evaluations'][i]['aupr_hendricks_uncertainty_fail'] for i in range(len(info['evaluations']))])
-
-                    ours_mean = np.mean(ours)
-                    ours_std = np.std(ours)
-                %>
-                <td>AUPR Hendricks uncertainty Fail</td>
-                <td>--</td>
-                <td>${'{0:.4f}'.format(ours_mean)} +/- ${'{0:.2f}'.format(ours_std)}</td>
-            </tr>
-
 
             % for k in info['evaluations'][0].keys():
                 % if k.endswith('_auc'):

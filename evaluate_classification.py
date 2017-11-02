@@ -79,14 +79,35 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
 
     x = np.zeros([len(y_val), len(uncertainties) + dataset.output_size])
     x[:, len(uncertainties):] = y_probabilistic.mean(axis=0)
-    #y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
-    y = 1 - top_n(y_val, y_probabilistic.mean(axis=0))
+    y = (y_val != y_probabilistic.mean(axis=0).argmax(axis=1))
+    # y = 1 - top_n(y_val, y_probabilistic.mean(axis=0))
     for i, (name, func, y_score) in enumerate(uncertainties):
         _, uncertainty = func(y_score)
         x[:, i] = uncertainty
 
     clf = xgb.XGBClassifier().fit(x, y)
     return clf.predict_proba(test_uncertainty)[:, 1]
+
+
+def uncertainty_metrics(info, suffix, success, uncertainty):
+    brier = metrics.brier_score_loss(y_true=success, y_prob=1-uncertainty)
+    info['brier_'+suffix] = brier
+    print('brier_'+suffix, brier)
+
+    auc_hendricks = metrics.roc_auc_score(y_true=success, y_score=1-uncertainty)
+    info['auc_hendricks_'+suffix] = auc_hendricks
+    print('auc_hendricks_'+suffix, auc_hendricks)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=1-uncertainty)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_success_'+suffix] = aupr
+    print('aupr_hendricks_success_'+suffix, aupr)
+
+    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=(1-uncertainty)*-1)
+    aupr = metrics.auc(recall, precision)
+    info['aupr_hendricks_fail_'+suffix] = aupr
+    print('aupr_hendricks_fail_'+suffix, aupr)
+
 
 
 def evaluate(model, dataset):
@@ -100,6 +121,10 @@ def evaluate(model, dataset):
     acc_test = (y_test == y_pred).mean()
     info['accuracy_test'] = acc_test
     print('test accuracy: {0:.4f}'.format(acc_test))
+
+    acc_top5_test = np.mean(top_n(y_test, y_probabilistic.mean(axis=0)))
+    info['accuracy_top5_test'] = acc_top5_test
+    print('test accuracy top 5: {0:.4f}'.format(acc_top5_test))
 
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
@@ -139,43 +164,17 @@ def evaluate(model, dataset):
     info['uncertainty_classifer_auc'] = auc
     print('uncertainty_classifer_auc:', auc)
 
-    #success = (y_test == y_pred)
-    success = top_n(y_test, y_probabilistic.mean(axis=0))
+    success = (y_test == y_pred)
+    # success = top_n(y_test, y_probabilistic.mean(axis=0))
     max_proba = y_probabilistic.mean(axis=0).max(axis=1)
+    _, std_max_proba = uncertainty_std_argmax(y_probabilistic)
 
-    brier_pred = metrics.brier_score_loss(y_true=success, y_prob=max_proba)
-    brier_unc = metrics.brier_score_loss(y_true=success, y_prob=1-uncertainty)
-    info['brier_prediction'] = brier_pred
-    info['brier_uncertainty'] = brier_unc
-    print('brier_prediction', brier_pred)
-    print('brier_uncertainty', brier_unc)
-
-    auc_hendricks_softmax = metrics.roc_auc_score(y_true=success, y_score=max_proba)
-    auc_hendricks_uncertainty = metrics.roc_auc_score(y_true=success, y_score=1-uncertainty)
-    info['auc_hendricks_softmax'] = auc_hendricks_softmax
-    info['auc_hendricks_uncertainty'] = auc_hendricks_uncertainty
-    print('auc_hendricks_softmax', auc_hendricks_softmax)
-    print('auc_hendricks_uncertainty', auc_hendricks_uncertainty)
-
-    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=max_proba)
-    aupr = metrics.auc(recall, precision)
-    info['aupr_hendricks_softmax_success'] = aupr
-    print('aupr_hendricks_softmax_success', aupr)
-
-    precision, recall, _ = metrics.precision_recall_curve(y_true=success, probas_pred=1-uncertainty)
-    aupr = metrics.auc(recall, precision)
-    info['aupr_hendricks_uncertainty_success'] = aupr
-    print('aupr_hendricks_uncertainty_success', aupr)
-
-    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=max_proba*-1)
-    aupr = metrics.auc(recall, precision)
-    info['aupr_hendricks_softmax_fail'] = aupr
-    print('aupr_hendricks_softmax_fail', aupr)
-
-    precision, recall, _ = metrics.precision_recall_curve(y_true=1-success, probas_pred=(1-uncertainty)*-1)
-    aupr = metrics.auc(recall, precision)
-    info['aupr_hendricks_uncertainty_fail'] = aupr
-    print('aupr_hendricks_uncertainty_fail', aupr)
+    print('--'*10, 'MAX PROBA', '--'*10)
+    uncertainty_metrics(info, 'maxproba', success, 1 - max_proba)
+    print('--'*10, 'STD MAX PROBA', '--'*10)
+    uncertainty_metrics(info, 'stdmaxproba', success, 1 - std_max_proba)
+    print('--'*10, 'STACKING', '--'*10)
+    uncertainty_metrics(info, 'stacking', success, uncertainty)
 
 
     classes = dataset.classes
