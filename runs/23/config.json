@@ -1,0 +1,13 @@
+{
+  "dataset_settings": {
+    "name": "cifar100"
+  },
+  "model_settings": {
+    "batch_size": 100,
+    "epochs": 500,
+    "name": "cnn",
+    "posterior_samples": 100
+  },
+  "num_experiments": 3,
+  "seed": 1337
+}
