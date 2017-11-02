@@ -47,7 +47,7 @@ def uncertainty_entropy(y_score):
         y_entropy.append(entropy(y))
     y_entropy = np.array(y_entropy)
     y_pred = y_score.argmax(axis=1)
-
+    y_entropy = (y_entropy - y_entropy.min())/(y_entropy.max() - y_entropy.min())
     return y_pred, y_entropy
 
 
@@ -165,14 +165,20 @@ def evaluate(model, dataset):
     print('uncertainty_classifer_auc:', auc)
 
     success = (y_test == y_pred)
+    success_det = (y_test == y_deterministic.argmax(axis=1))
     # success = top_n(y_test, y_probabilistic.mean(axis=0))
     max_proba = y_probabilistic.mean(axis=0).max(axis=1)
     _, std_max_proba = uncertainty_std_argmax(y_probabilistic)
+    _, entropy_uncertainty = uncertainty_entropy(y_deterministic)
 
     print('--'*10, 'MAX PROBA', '--'*10)
     uncertainty_metrics(info, 'maxproba', success, 1 - max_proba)
+    print('--'*10, 'MAX PROBA DET', '--'*10)
+    uncertainty_metrics(info, 'maxprobadet', success_det, 1 - y_deterministic.max(axis=1))
     print('--'*10, 'STD MAX PROBA', '--'*10)
     uncertainty_metrics(info, 'stdmaxproba', success, 1 - std_max_proba)
+    print('--'*10, 'ENTROPY', '--'*10)
+    uncertainty_metrics(info, 'entropy', success_det, entropy_uncertainty)
     print('--'*10, 'STACKING', '--'*10)
     uncertainty_metrics(info, 'stacking', success, uncertainty)
 

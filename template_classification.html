@@ -24,14 +24,14 @@
     <table class="bordered">
         <%
             metrics = ['brier_', 'auc_hendricks_', 'aupr_hendricks_success_', 'aupr_hendricks_fail_']
-            estimates = ['stdmaxproba', 'maxproba', 'stacking']
+            estimates = ['stdmaxproba', 'maxproba', 'maxprobadet', 'entropy', 'stacking']
         %>
         <thead>
             <tr>
                 <th>Metric</th>
-                <th>Std max probability</th>
-                <th>Max probability</th>
-                <th>Stacking</th>
+                % for estimate in estimates:
+                    <th>${estimate}</th>
+                % endfor
             </tr>
         </thead>
         <tbody>
