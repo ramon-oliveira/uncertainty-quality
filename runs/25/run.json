@@ -1,0 +1,120 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/uncertainty-quality",
+    "dependencies": [
+      "numpy==1.13.1",
+      "sacred==0.7b3"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [
+      {
+        "commit": "511b73af0ba187b12207ce4cc010a04d0fb174eb",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "511b73af0ba187b12207ce4cc010a04d0fb174eb",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "511b73af0ba187b12207ce4cc010a04d0fb174eb",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "511b73af0ba187b12207ce4cc010a04d0fb174eb",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "511b73af0ba187b12207ce4cc010a04d0fb174eb",
+        "dirty": false,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      }
+    ],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_c57f82bb5a7707adcd672a900ec41e5a.py"
+      ],
+      [
+        "evaluate_classification.py",
+        "_sources/evaluate_classification_5e5d2f178ebdbb20eeec65f973b8a4ef.py"
+      ],
+      [
+        "evaluate_regression.py",
+        "_sources/evaluate_regression_97888b666b3a9efd44b96b0131bf5dd3.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_02ca2c49e0b45e0a727579564b39a44d.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_7aad19c01098c30df300709607b9c1c6.py"
+      ]
+    ]
+  },
+  "heartbeat": "2017-11-02T08:07:42.534837",
+  "host": {
+    "cpu": "Intel(R) Core(TM) i7-4820K CPU @ 3.70GHz",
+    "gpus": {
+      "driver_version": "361.93.02",
+      "gpus": [
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4042
+        },
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4043
+        }
+      ]
+    },
+    "hostname": "dl-01",
+    "os": [
+      "Linux",
+      "Linux-3.13.0-107-generic-x86_64-with-debian-jessie-sid"
+    ],
+    "python_version": "3.6.1"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "dataset_settings.name=cifar10"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2017-11-02T04:02:25.018548",
+  "status": "COMPLETED",
+  "stop_time": "2017-11-02T08:07:36.868043"
+}

@@ -1,0 +1,13 @@
+{
+  "dataset_settings": {
+    "name": "fashion_mnist"
+  },
+  "model_settings": {
+    "batch_size": 100,
+    "epochs": 100,
+    "name": "cnn",
+    "posterior_samples": 50
+  },
+  "num_experiments": 10,
+  "seed": 1337
+}

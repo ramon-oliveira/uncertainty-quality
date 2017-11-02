@@ -1,0 +1,96 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/Repos/uncertainty-quality",
+    "dependencies": [
+      "numpy==1.12.1",
+      "sacred==0.7.1"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_c57f82bb5a7707adcd672a900ec41e5a.py"
+      ],
+      [
+        "evaluate_classification.py",
+        "_sources/evaluate_classification_5e5d2f178ebdbb20eeec65f973b8a4ef.py"
+      ],
+      [
+        "evaluate_regression.py",
+        "_sources/evaluate_regression_97888b666b3a9efd44b96b0131bf5dd3.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_02ca2c49e0b45e0a727579564b39a44d.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_7aad19c01098c30df300709607b9c1c6.py"
+      ]
+    ]
+  },
+  "fail_trace": [
+    "Traceback (most recent call last):\n",
+    "  File \"/home/roliveira/miniconda3/lib/python3.6/site-packages/sacred/run.py\", line 263, in _get_captured_output\n    text = text.decode('utf-8')\n",
+    "UnicodeDecodeError: 'utf-8' codec can't decode byte 0x88 in position 0: invalid start byte\n"
+  ],
+  "heartbeat": "2017-11-02T07:01:47.013452",
+  "host": {
+    "ENV": {},
+    "cpu": "Intel(R) Core(TM) i5-7400 CPU @ 3.00GHz",
+    "gpus": {
+      "driver_version": "384.90",
+      "gpus": [
+        {
+          "model": "GeForce GTX 1050 Ti",
+          "persistence_mode": false,
+          "total_memory": 4037
+        }
+      ]
+    },
+    "hostname": "roliveira",
+    "os": [
+      "Linux",
+      "Linux-4.10.0-38-generic-x86_64-with-debian-stretch-sid"
+    ],
+    "python_version": "3.6.2"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--capture": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "dataset_settings.name=fashion_mnist"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "result": null,
+  "start_time": "2017-11-02T04:03:56.319015",
+  "status": "FAILED",
+  "stop_time": "2017-11-02T07:01:50.825345"
+}
