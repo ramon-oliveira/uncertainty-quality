@@ -17,14 +17,14 @@ ex.observers.append(FileStorageObserver.create('runs/', template='template_class
 @ex.config
 def cfg():
     seed = 1337
-    num_experiments = 10
+    num_experiments = 1
 
     dataset_settings = {
         'name': 'cifar100',
     }
 
     model_settings = {
-        'name': 'cnn',
+        'name': 'vggtop',
         'epochs': 100,
         'batch_size': 100,
         'posterior_samples': 50,
@@ -34,6 +34,9 @@ def cfg():
 @ex.capture
 def train(model, dataset):
     model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val)
+    # weights_filename = 'cifar10_weights.hdf5'
+    # model.model.load_weights(weights_filename)
+    # model.probabilistic_model.set_weights(model.model.get_weights())
 
 
 @ex.capture

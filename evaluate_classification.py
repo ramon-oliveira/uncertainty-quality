@@ -5,6 +5,7 @@ import base64
 from PIL import Image
 import io
 from sklearn import metrics
+from sklearn import linear_model
 
 
 def top_n(y_true, y_score, n=5):
@@ -64,6 +65,11 @@ def uncertainty_mean_entropy(y_probabilistic):
 
 def uncertainty_classifer(model, dataset, test_uncertainty):
     x_val, y_val = dataset.x_val, dataset.y_val.argmax(axis=1)
+    # x_train, y_train = dataset.x_train, dataset.y_train.argmax(axis=1)
+    # print(x_train.shape, y_train.shape)
+    # print(x_val.shape, y_val.shape)
+    # x_val = np.concatenate([x_train, x_val], axis=0)
+    # y_val = np.concatenate([y_train, y_val], axis=0)
 
     y_deterministic = model.predict(x_val, probabilistic=False)
     y_probabilistic = model.predict(x_val, probabilistic=True)
@@ -85,7 +91,8 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
         _, uncertainty = func(y_score)
         x[:, i] = uncertainty
 
-    clf = xgb.XGBClassifier().fit(x, y)
+    clf = xgb.XGBClassifier(n_estimators=250).fit(x, y)
+    # clf = linear_model.LogisticRegression().fit(x, y)
     return clf.predict_proba(test_uncertainty)[:, 1]
 
 
@@ -167,6 +174,8 @@ def evaluate(model, dataset):
     success = (y_test == y_pred)
     success_det = (y_test == y_deterministic.argmax(axis=1))
     # success = top_n(y_test, y_probabilistic.mean(axis=0))
+    # success_det = top_n(y_test, y_deterministic.argmax(axis=1))
+
     max_proba = y_probabilistic.mean(axis=0).max(axis=1)
     _, std_max_proba = uncertainty_std_argmax(y_probabilistic)
     _, entropy_uncertainty = uncertainty_entropy(y_deterministic)
