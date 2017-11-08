@@ -89,7 +89,7 @@ class BaseModel(object):
 
         self.model.load_weights(weights_filename)
         self.probabilistic_model.set_weights(self.model.get_weights())
-        os.remove(weights_filename)
+        # os.remove(weights_filename)
         return self
 
     def predict(self, x, probabilistic=False):
