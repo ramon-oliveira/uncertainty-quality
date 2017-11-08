@@ -6,6 +6,34 @@ from PIL import Image
 import io
 from sklearn import metrics
 from sklearn import linear_model
+from sklearn import model_selection
+
+
+class StackedModel(object):
+
+    def __init__(self, base_clf, clf_params, n_clf):
+        self.base_clf = base_clf
+        self.clf_params = clf_params
+        self.n_clf = n_clf
+
+    def fit(self, X, y):
+        skf = model_selection.StratifiedKFold(n_splits=self.n_clf)
+        self.clfs = []
+        for idxs, _ in skf.split(X, y):
+            self.clfs.append(self.base_clf(**self.clf_params).fit(X[idxs], y[idxs]))
+
+        X_proba = np.array([clf.predict_proba(X)[:, 1] for clf in self.clfs]).T
+        self.top_clf = self.base_clf(**self.clf_params).fit(X_proba, y)
+
+        return self
+
+    def predict(self, X):
+        X_proba = np.array([clf.predict_proba(X)[:, 1] for clf in self.clfs]).T
+        return self.top_clf.predict(X_proba)
+
+    def predict_proba(self, X):
+        X_proba = np.array([clf.predict_proba(X)[:, 1] for clf in self.clfs]).T
+        return self.top_clf.predict_proba(X_proba)
 
 
 def top_n(y_true, y_score, n=5):
@@ -91,7 +119,8 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
         _, uncertainty = func(y_score)
         x[:, i] = uncertainty
 
-    clf = xgb.XGBClassifier(n_estimators=250).fit(x, y)
+    clf = StackedModel(xgb.XGBClassifier, {}, 10).fit(x, y)
+    # clf = xgb.XGBClassifier().fit(x, y)
     # clf = linear_model.LogisticRegression().fit(x, y)
     return clf.predict_proba(test_uncertainty)[:, 1]
 

@@ -25,9 +25,9 @@ def cfg():
 
     model_settings = {
         'name': 'vggtop',
-        'epochs': 100,
+        'epochs': 200,
         'batch_size': 100,
-        'posterior_samples': 50,
+        'posterior_samples': 100,
     }
 
 
@@ -35,6 +35,7 @@ def cfg():
 def train(model, dataset):
     model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val)
     # weights_filename = 'cifar10_weights.hdf5'
+    # weights_filename = 'runs/20d35c0c7d7b47a7bcd664c52ec3063f.hdf5'
     # model.model.load_weights(weights_filename)
     # model.probabilistic_model.set_weights(model.model.get_weights())
 

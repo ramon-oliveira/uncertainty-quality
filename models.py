@@ -74,7 +74,7 @@ class BaseModel(object):
                             steps_per_epoch=int(np.ceil(x_train.shape[0]/self.batch_size)),
                             epochs=self.epochs,
                             validation_data=(x_val, y_val),
-                            callbacks=[cp, lrc],
+                            callbacks=[cp],
                             workers=4)
 
 
@@ -242,12 +242,13 @@ class VGGTOP(BaseModel):
         model.add(AveragePooling2D(pool_size=(1, 1)))
 
         model.add(Flatten())
-        model.add(Dense(512))
+        model.add(Dense(1024))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
         model.add(Dense(dataset.output_size))
         model.add(Activation('softmax'))
-        opt = optimizers.SGD(lr=0.1)
+        opt = optimizers.Adam()
+        # opt = optimizers.SGD(lr=0.1)
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
@@ -265,12 +266,13 @@ class VGGTOP(BaseModel):
         probabilistic_model.add(AveragePooling2D(pool_size=(1, 1)))
 
         probabilistic_model.add(Flatten())
-        probabilistic_model.add(Dense(512))
+        probabilistic_model.add(Dense(1024))
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(dataset.output_size))
         probabilistic_model.add(Activation('softmax'))
-        opt = optimizers.SGD(lr=0.1)
+        opt = optimizers.Adam()
+        # opt = optimizers.SGD(lr=0.1)
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
