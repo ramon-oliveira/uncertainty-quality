@@ -59,7 +59,7 @@ class BaseModel(object):
             featurewise_std_normalization=False,  # divide inputs by std of the dataset
             samplewise_std_normalization=False,  # divide each input by its std
             zca_whitening=False,  # apply ZCA whitening
-            rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
+            rotation_range=15,  # randomly rotate images in the range (degrees, 0 to 180)
             width_shift_range=0.1,  # randomly shift images horizontally (fraction of total width)
             height_shift_range=0.1,  # randomly shift images vertically (fraction of total height)
             horizontal_flip=True,  # randomly flip images
@@ -227,52 +227,51 @@ class VGGTOP(BaseModel):
             'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
             'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
         }
+        weight_decay = 0.0005
 
         # deterministic model
         model = Sequential()
-        model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
+        model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape, kernel_regularizer=l2(weight_decay)))
         for x in cfg['VGG16'][1:]:
             if x == 'M':
                 model.add(MaxPooling2D(pool_size=(2, 2)))
             else:
-                model.add(Conv2D(x, (3, 3), padding='same'))
-                model.add(BatchNormalization())
+                model.add(Conv2D(x, (3, 3), padding='same', kernel_regularizer=l2(weight_decay)))
                 model.add(Activation('relu'))
+                model.add(BatchNormalization())
                 model.add(Dropout(0.25))
-        model.add(AveragePooling2D(pool_size=(1, 1)))
 
         model.add(Flatten())
-        model.add(Dense(1024))
+        model.add(Dense(512, kernel_regularizer=l2(weight_decay)))
         model.add(Activation('relu'))
+        model.add(BatchNormalization())
         model.add(Dropout(0.5))
         model.add(Dense(dataset.output_size))
         model.add(Activation('softmax'))
         opt = optimizers.Adam()
-        # opt = optimizers.SGD(lr=0.1)
         model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.model = model
 
         # probabilistic model
         probabilistic_model = Sequential()
-        probabilistic_model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
+        probabilistic_model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape, kernel_regularizer=l2(weight_decay)))
         for x in cfg['VGG16'][1:]:
             if x == 'M':
                 probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
             else:
-                probabilistic_model.add(Conv2D(x, (3, 3), padding='same'))
-                probabilistic_model.add(BatchNormalization())
+                probabilistic_model.add(Conv2D(x, (3, 3), padding='same', kernel_regularizer=l2(weight_decay)))
                 probabilistic_model.add(Activation('relu'))
+                probabilistic_model.add(BatchNormalization())
                 probabilistic_model.add(BayesianDropout(0.25))
-        probabilistic_model.add(AveragePooling2D(pool_size=(1, 1)))
 
         probabilistic_model.add(Flatten())
-        probabilistic_model.add(Dense(1024))
+        probabilistic_model.add(Dense(512, kernel_regularizer=l2(weight_decay)))
         probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(BatchNormalization())
         probabilistic_model.add(BayesianDropout(0.5))
         probabilistic_model.add(Dense(dataset.output_size))
         probabilistic_model.add(Activation('softmax'))
         opt = optimizers.Adam()
-        # opt = optimizers.SGD(lr=0.1)
         probabilistic_model.compile(loss='categorical_crossentropy', optimizer=opt, metrics=['accuracy'])
         self.probabilistic_model = probabilistic_model
 
