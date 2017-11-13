@@ -200,42 +200,49 @@ class Melanoma(Dataset):
 
         self.input_shape = x_train.shape[1:]
         self.output_size = 2
+        self.classes = ['not-melanoma', 'melanoma']
 
-        datagen = ImageDataGenerator(
-            rotation_range=30,
-            width_shift_range=0.2,
-            height_shift_range=0.2,
-            shear_range=0.1,
-            zoom_range=0.1,
-            fill_mode='nearest',
-            horizontal_flip=True,
-            vertical_flip=True,
-        )
+        # datagen = ImageDataGenerator(
+        #     rotation_range=30,
+        #     width_shift_range=0.2,
+        #     height_shift_range=0.2,
+        #     shear_range=0.1,
+        #     zoom_range=0.1,
+        #     fill_mode='nearest',
+        #     horizontal_flip=True,
+        #     vertical_flip=True,
+        # )
+        #
+        # n = 48000
+        # xs = []
+        # ys = []
+        # pbar = tqdm.tqdm(total=n)
+        # for x, y in datagen.flow(x_train, y_train, batch_size=1000):
+        #     xs.append(x)
+        #     ys.append(y)
+        #     pbar.update(1000)
+        #     if len(xs)*1000 == n:
+        #         pbar.close()
+        #         break
+        # xs.append(x_train)
+        # ys.append(y_train)
+        # x_train = np.vstack(xs)
+        # y_train = np.vstack(ys)
 
-        n = 48000
-        xs = []
-        ys = []
-        pbar = tqdm.tqdm(total=n)
-        for x, y in datagen.flow(x_train, y_train, batch_size=1000):
-            xs.append(x)
-            ys.append(y)
-            pbar.update(1000)
-            if len(xs)*1000 == n:
-                pbar.close()
-                break
-        xs.append(x_train)
-        ys.append(y_train)
-
-        x_train = np.vstack(xs)
-        y_train = np.vstack(ys)
-
-        split = 42000
+        split = int(len(x_train)*0.8)
         self.x_train = x_train[:split]
         self.y_train = y_train[:split]
         self.x_val = x_train[split:]
         self.y_val = y_train[split:]
         self.x_test = x_test
         self.y_test = y_test
+
+        print('train shape:', self.y_train.shape)
+        print('val shape:', self.y_val.shape)
+        print('test shape:', self.y_test.shape)
+        print('train prop:', self.y_train.argmax(axis=1).mean())
+        print('val prop:', self.y_val.argmax(axis=1).mean())
+        print('test prop:', self.y_test.argmax(axis=1).mean())
 
 
 class BostonHousing(Dataset):

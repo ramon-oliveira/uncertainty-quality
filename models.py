@@ -231,18 +231,22 @@ class VGGTOP(BaseModel):
 
         # deterministic model
         model = Sequential()
-        model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape, kernel_regularizer=l2(weight_decay)))
+        model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
         for x in cfg['VGG16'][1:]:
             if x == 'M':
                 model.add(MaxPooling2D(pool_size=(2, 2)))
             else:
-                model.add(Conv2D(x, (3, 3), padding='same', kernel_regularizer=l2(weight_decay)))
+                model.add(Conv2D(x, (3, 3), padding='same'))
                 model.add(Activation('relu'))
                 model.add(BatchNormalization())
                 model.add(Dropout(0.25))
 
         model.add(Flatten())
-        model.add(Dense(512, kernel_regularizer=l2(weight_decay)))
+        model.add(Dense(512))
+        model.add(Activation('relu'))
+        model.add(BatchNormalization())
+        model.add(Dropout(0.5))
+        model.add(Dense(512))
         model.add(Activation('relu'))
         model.add(BatchNormalization())
         model.add(Dropout(0.5))
@@ -254,18 +258,22 @@ class VGGTOP(BaseModel):
 
         # probabilistic model
         probabilistic_model = Sequential()
-        probabilistic_model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape, kernel_regularizer=l2(weight_decay)))
+        probabilistic_model.add(Conv2D(64, (3, 3), padding='same', input_shape=dataset.input_shape))
         for x in cfg['VGG16'][1:]:
             if x == 'M':
                 probabilistic_model.add(MaxPooling2D(pool_size=(2, 2)))
             else:
-                probabilistic_model.add(Conv2D(x, (3, 3), padding='same', kernel_regularizer=l2(weight_decay)))
+                probabilistic_model.add(Conv2D(x, (3, 3), padding='same'))
                 probabilistic_model.add(Activation('relu'))
                 probabilistic_model.add(BatchNormalization())
                 probabilistic_model.add(BayesianDropout(0.25))
 
         probabilistic_model.add(Flatten())
-        probabilistic_model.add(Dense(512, kernel_regularizer=l2(weight_decay)))
+        probabilistic_model.add(Dense(512))
+        probabilistic_model.add(Activation('relu'))
+        probabilistic_model.add(BatchNormalization())
+        probabilistic_model.add(BayesianDropout(0.5))
+        probabilistic_model.add(Dense(512))
         probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(BatchNormalization())
         probabilistic_model.add(BayesianDropout(0.5))
