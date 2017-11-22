@@ -11,7 +11,8 @@ import evaluate_regression
 
 ex = Experiment('uncertainty-quality')
 ex.captured_out_filter = apply_backspaces_and_linefeeds
-ex.observers.append(FileStorageObserver.create('runs/', template='template_classification.html'))
+storage_observer = FileStorageObserver.create('runs/', template='template_classification.html')
+ex.observers.append(storage_observer)
 
 
 @ex.config
@@ -20,11 +21,11 @@ def cfg():
     num_experiments = 1
 
     dataset_settings = {
-        'name': 'cifar100',
+        'name': 'mnist',
     }
 
     model_settings = {
-        'name': 'vggtop',
+        'name': 'cnn',
         'epochs': 200,
         'batch_size': 100,
         'posterior_samples': 100,
@@ -33,11 +34,7 @@ def cfg():
 
 @ex.capture
 def train(model, dataset):
-    model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val)
-    # weights_filename = 'cifar10_weights.hdf5'
-    # weights_filename = 'runs/20d35c0c7d7b47a7bcd664c52ec3063f.hdf5'
-    # model.model.load_weights(weights_filename)
-    # model.probabilistic_model.set_weights(model.model.get_weights())
+    model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val, save_dir=storage_observer.dir)
 
 
 @ex.capture
