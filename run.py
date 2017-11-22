@@ -32,6 +32,23 @@ def cfg():
     }
 
 
+@ex.named_config
+def cfg_cifar100():
+    seed = 1337
+    num_experiments = 1
+
+    dataset_settings = {
+        'name': 'cifar100',
+    }
+
+    model_settings = {
+        'name': 'vggtop',
+        'epochs': 200,
+        'batch_size': 10,
+        'posterior_samples': 100,
+    }
+
+
 @ex.capture
 def train(model, dataset):
     model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val, save_dir=storage_observer.dir)
