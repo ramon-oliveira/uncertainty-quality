@@ -20,12 +20,12 @@ def cfg():
     num_experiments = 1
 
     dataset_settings = {
-        'name': 'cifar100',
+        'name': 'cifar10',
     }
 
     model_settings = {
         'name': 'vggtop',
-        'epochs': 200,
+        'epochs': 100,
         'batch_size': 100,
         'posterior_samples': 100,
     }
@@ -53,8 +53,9 @@ def run(model_settings, dataset_settings, num_experiments, _log):
     _log.info('dataset_settings: ' + str(dataset_settings))
     _log.info('model_settings: ' + str(model_settings))
     ex.info['evaluations'] = []
-    for i in range(num_experiments):
-        print('#'*10, 'Run', i+1, '#'*10)
+    for i in range(1, num_experiments+1):
+        print('#'*10, 'Run', i, '#'*10)
+        dataset_settings['train_size'] = i/num_experiments
         dataset = datasets.load(dataset_settings)
         model_settings.update({'dataset': dataset})
         model = models.load(model_settings)

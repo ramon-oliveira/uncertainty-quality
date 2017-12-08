@@ -17,9 +17,10 @@ import re
 
 class Dataset(object):
 
-    def __init__(self, type):
+    def __init__(self, type, train_size=1.0):
         self.type = type
         self.sota = {}
+        self.train_size = train_size
 
 
 class MNIST(Dataset):
@@ -89,6 +90,10 @@ class FashonMNIST(Dataset):
         self.x_test = x_test
         self.y_test = y_test
 
+        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        self.x_train = self.x_train[idxs]
+        self.y_train = self.y_train[idxs]
+
 
 class CIFAR10(Dataset):
 
@@ -116,6 +121,10 @@ class CIFAR10(Dataset):
         self.y_val = y_train[split:]
         self.x_test = x_test
         self.y_test = y_test
+
+        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        self.x_train = self.x_train[idxs]
+        self.y_train = self.y_train[idxs]
 
 
 class CIFAR100(Dataset):
