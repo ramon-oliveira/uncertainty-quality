@@ -63,6 +63,13 @@ def uncertainty_mean_argmax(y_probabilistic):
     return y_pred, 1 - y_mean
 
 
+def uncertainty_argmax(y_deterministic):
+    y_pred = y_deterministic.argmax(axis=1)
+    y_mean = y_deterministic.max(axis=1)
+
+    return y_pred, 1 - y_mean
+
+
 def uncertainty_std_mean(y_probabilistic):
     y_pred = y_probabilistic.mean(axis=0).argmax(axis=1)
     y_std_mean = y_probabilistic.std(axis=0).mean(axis=1)
@@ -105,6 +112,7 @@ def uncertainty_classifer(model, dataset, test_uncertainty):
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
         ('uncertainty_mean_argmax', uncertainty_mean_argmax, y_probabilistic),
+        ('uncertainty_argmax', uncertainty_argmax, y_deterministic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
         ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
@@ -165,6 +173,7 @@ def evaluate(model, dataset):
     uncertainties = [
         ('uncertainty_std_argmax', uncertainty_std_argmax, y_probabilistic),
         ('uncertainty_mean_argmax', uncertainty_mean_argmax, y_probabilistic),
+        ('uncertainty_argmax', uncertainty_argmax, y_deterministic),
         ('uncertainty_std_mean', uncertainty_std_mean, y_probabilistic),
         ('uncertainty_entropy', uncertainty_entropy, y_deterministic),
         ('uncertainty_entropy_mean', uncertainty_entropy, y_probabilistic.mean(axis=0)),
