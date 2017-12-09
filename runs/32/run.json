@@ -1,0 +1,146 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/uncertainty-quality",
+    "dependencies": [
+      "numpy==1.13.1",
+      "sacred==0.7b3"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      }
+    ],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_ec9e9235817541de5c92156dd02c03af.py"
+      ],
+      [
+        "evaluate_classification.py",
+        "_sources/evaluate_classification_edc78344915a1896a57399656e369567.py"
+      ],
+      [
+        "evaluate_regression.py",
+        "_sources/evaluate_regression_97888b666b3a9efd44b96b0131bf5dd3.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_ba8f9df99b7c996eba7f3ac50989ff3e.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_391f576e28748be05f76326faf2411be.py"
+      ]
+    ]
+  },
+  "fail_trace": [
+    "Traceback (most recent call last):\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 1327, in _do_call\n    return fn(*args)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 1306, in _run_fn\n    status, run_metadata)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/contextlib.py\", line 89, in __exit__\n    next(self.gen)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/framework/errors_impl.py\", line 466, in raise_exception_on_not_ok_status\n    pywrap_tensorflow.TF_GetCode(status))\n",
+    "tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor with shape[16,56,56,256]\n\t [[Node: dropout_5/cond/dropout/div = RealDiv[T=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/gpu:0\"](dropout_5/cond/mul, dropout_5/cond/dropout/keep_prob)]]\n\t [[Node: loss/add_13/_927 = _Recv[client_terminated=false, recv_device=\"/job:localhost/replica:0/task:0/cpu:0\", send_device=\"/job:localhost/replica:0/task:0/gpu:0\", send_device_incarnation=1, tensor_name=\"edge_10125_loss/add_13\", tensor_type=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/cpu:0\"]()]]\n",
+    "\nDuring handling of the above exception, another exception occurred:\n\n",
+    "Traceback (most recent call last):\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/config/captured_function.py\", line 47, in captured_function\n    result = wrapped(*args, **kwargs)\n",
+    "  File \"run.py\", line 61, in run\n    train(model, dataset)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/config/captured_function.py\", line 47, in captured_function\n    result = wrapped(*args, **kwargs)\n",
+    "  File \"run.py\", line 36, in train\n    model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val)\n",
+    "  File \"/home/roliveira/uncertainty-quality/models.py\", line 78, in fit\n    workers=4)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/legacy/interfaces.py\", line 87, in wrapper\n    return func(*args, **kwargs)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/models.py\", line 1134, in fit_generator\n    initial_epoch=initial_epoch)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/legacy/interfaces.py\", line 87, in wrapper\n    return func(*args, **kwargs)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/engine/training.py\", line 2047, in fit_generator\n    class_weight=class_weight)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/engine/training.py\", line 1767, in train_on_batch\n    outputs = self.train_function(ins)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/backend/tensorflow_backend.py\", line 2331, in __call__\n    **self.session_kwargs)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 895, in run\n    run_metadata_ptr)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 1124, in _run\n    feed_dict_tensor, options, run_metadata)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 1321, in _do_run\n    options, run_metadata)\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/client/session.py\", line 1340, in _do_call\n    raise type(e)(node_def, op, message)\n",
+    "tensorflow.python.framework.errors_impl.ResourceExhaustedError: OOM when allocating tensor with shape[16,56,56,256]\n\t [[Node: dropout_5/cond/dropout/div = RealDiv[T=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/gpu:0\"](dropout_5/cond/mul, dropout_5/cond/dropout/keep_prob)]]\n\t [[Node: loss/add_13/_927 = _Recv[client_terminated=false, recv_device=\"/job:localhost/replica:0/task:0/cpu:0\", send_device=\"/job:localhost/replica:0/task:0/gpu:0\", send_device_incarnation=1, tensor_name=\"edge_10125_loss/add_13\", tensor_type=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/cpu:0\"]()]]\n\nCaused by op 'dropout_5/cond/dropout/div', defined at:\n  File \"run.py\", line 51, in <module>\n    @ex.automain\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/experiment.py\", line 130, in automain\n    self.run_commandline()\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/experiment.py\", line 242, in run_commandline\n    return self.run(cmd_name, config_updates, named_configs, {}, args)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/experiment.py\", line 187, in run\n    run()\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/run.py\", line 212, in __call__\n    self.result = self.main_function(*args)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/config/captured_function.py\", line 47, in captured_function\n    result = wrapped(*args, **kwargs)\n  File \"run.py\", line 60, in run\n    model = models.load(model_settings)\n  File \"/home/roliveira/uncertainty-quality/models.py\", line 319, in load\n    model = VGGTOP(**settings)\n  File \"/home/roliveira/uncertainty-quality/models.py\", line 242, in __init__\n    model.add(Dropout(0.25))\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/models.py\", line 475, in add\n    output_tensor = layer(self.outputs[0])\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/engine/topology.py\", line 602, in __call__\n    output = self.call(inputs, **kwargs)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/layers/core.py\", line 117, in call\n    training=training)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/backend/tensorflow_backend.py\", line 2729, in in_train_phase\n    x = switch(training, x, alt)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/backend/tensorflow_backend.py\", line 2664, in switch\n    else_expression_fn)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/util/deprecation.py\", line 296, in new_func\n    return func(*args, **kwargs)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/control_flow_ops.py\", line 1819, in cond\n    orig_res_t, res_t = context_t.BuildCondBranch(true_fn)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/control_flow_ops.py\", line 1694, in BuildCondBranch\n    original_result = fn()\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/layers/core.py\", line 115, in dropped_inputs\n    seed=self.seed)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/Keras-2.0.8-py3.6.egg/keras/backend/tensorflow_backend.py\", line 2989, in dropout\n    return tf.nn.dropout(x * 1., retain_prob, noise_shape, seed=seed)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/nn_ops.py\", line 1918, in dropout\n    ret = math_ops.div(x, keep_prob) * binary_tensor\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py\", line 1037, in div\n    return _div_python2(x, y, name)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/math_ops.py\", line 983, in _div_python2\n    return gen_math_ops._real_div(x, y, name=name)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/ops/gen_math_ops.py\", line 1831, in _real_div\n    result = _op_def_lib.apply_op(\"RealDiv\", x=x, y=y, name=name)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/framework/op_def_library.py\", line 767, in apply_op\n    op_def=op_def)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/framework/ops.py\", line 2630, in create_op\n    original_op=self._default_original_op, op_def=op_def)\n  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/tensorflow/python/framework/ops.py\", line 1204, in __init__\n    self._traceback = self._graph._extract_stack()  # pylint: disable=protected-access\n\nResourceExhaustedError (see above for traceback): OOM when allocating tensor with shape[16,56,56,256]\n\t [[Node: dropout_5/cond/dropout/div = RealDiv[T=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/gpu:0\"](dropout_5/cond/mul, dropout_5/cond/dropout/keep_prob)]]\n\t [[Node: loss/add_13/_927 = _Recv[client_terminated=false, recv_device=\"/job:localhost/replica:0/task:0/cpu:0\", send_device=\"/job:localhost/replica:0/task:0/gpu:0\", send_device_incarnation=1, tensor_name=\"edge_10125_loss/add_13\", tensor_type=DT_FLOAT, _device=\"/job:localhost/replica:0/task:0/cpu:0\"]()]]\n\n"
+  ],
+  "heartbeat": "2017-11-09T03:12:33.136480",
+  "host": {
+    "cpu": "Intel(R) Core(TM) i7-4820K CPU @ 3.70GHz",
+    "gpus": {
+      "driver_version": "361.93.02",
+      "gpus": [
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4042
+        },
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4043
+        }
+      ]
+    },
+    "hostname": "dl-01",
+    "os": [
+      "Linux",
+      "Linux-3.13.0-107-generic-x86_64-with-debian-jessie-sid"
+    ],
+    "python_version": "3.6.1"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "dataset_settings.name=melanoma",
+        "model_settings.batch_size=16"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "start_time": "2017-11-09T03:12:14.340766",
+  "status": "FAILED",
+  "stop_time": "2017-11-09T03:12:33.185028"
+}

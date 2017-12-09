@@ -1,0 +1,129 @@
+{
+  "artifacts": [],
+  "command": "run",
+  "experiment": {
+    "base_dir": "/home/roliveira/uncertainty-quality",
+    "dependencies": [
+      "numpy==1.13.1",
+      "sacred==0.7b3"
+    ],
+    "mainfile": "run.py",
+    "name": "uncertainty-quality",
+    "repositories": [
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      },
+      {
+        "commit": "8ce0e13e9205bbe52dbede166993e3564663f7ab",
+        "dirty": true,
+        "url": "git@github.com:ramon-oliveira/uncertainty-quality.git"
+      }
+    ],
+    "sources": [
+      [
+        "datasets.py",
+        "_sources/datasets_85628c19a873feaa59183801eeffdef3.py"
+      ],
+      [
+        "evaluate_classification.py",
+        "_sources/evaluate_classification_edc78344915a1896a57399656e369567.py"
+      ],
+      [
+        "evaluate_regression.py",
+        "_sources/evaluate_regression_97888b666b3a9efd44b96b0131bf5dd3.py"
+      ],
+      [
+        "models.py",
+        "_sources/models_ba8f9df99b7c996eba7f3ac50989ff3e.py"
+      ],
+      [
+        "run.py",
+        "_sources/run_391f576e28748be05f76326faf2411be.py"
+      ]
+    ]
+  },
+  "fail_trace": [
+    "Traceback (most recent call last):\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/config/captured_function.py\", line 47, in captured_function\n    result = wrapped(*args, **kwargs)\n",
+    "  File \"run.py\", line 62, in run\n    ex.info['evaluations'].append(evaluate(model, dataset))\n",
+    "  File \"/home/roliveira/anaconda3/lib/python3.6/site-packages/sacred/config/captured_function.py\", line 47, in captured_function\n    result = wrapped(*args, **kwargs)\n",
+    "  File \"run.py\", line 46, in evaluate\n    return evaluate_classification.evaluate(model, dataset)\n",
+    "  File \"/home/roliveira/uncertainty-quality/evaluate_classification.py\", line 224, in evaluate\n    classes = dataset.classes\n",
+    "AttributeError: 'Melanoma' object has no attribute 'classes'\n"
+  ],
+  "heartbeat": "2017-11-09T08:31:54.260398",
+  "host": {
+    "cpu": "Intel(R) Core(TM) i7-4820K CPU @ 3.70GHz",
+    "gpus": {
+      "driver_version": "361.93.02",
+      "gpus": [
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4042
+        },
+        {
+          "model": "GeForce GTX 980",
+          "persistence_mode": true,
+          "total_memory": 4043
+        }
+      ]
+    },
+    "hostname": "dl-01",
+    "os": [
+      "Linux",
+      "Linux-3.13.0-107-generic-x86_64-with-debian-jessie-sid"
+    ],
+    "python_version": "3.6.1"
+  },
+  "meta": {
+    "command": "run",
+    "options": {
+      "--beat_interval": null,
+      "--comment": null,
+      "--debug": false,
+      "--enforce_clean": false,
+      "--file_storage": null,
+      "--force": false,
+      "--help": false,
+      "--loglevel": null,
+      "--mongo_db": null,
+      "--name": null,
+      "--pdb": false,
+      "--print_config": false,
+      "--priority": null,
+      "--queue": false,
+      "--sql": null,
+      "--tiny_db": null,
+      "--unobserved": false,
+      "COMMAND": null,
+      "UPDATE": [
+        "dataset_settings.name=melanoma",
+        "model_settings.batch_size=8"
+      ],
+      "help": false,
+      "with": true
+    }
+  },
+  "resources": [],
+  "start_time": "2017-11-09T03:13:38.512377",
+  "status": "FAILED",
+  "stop_time": "2017-11-09T08:31:54.399454"
+}

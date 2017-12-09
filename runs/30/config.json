@@ -1,0 +1,13 @@
+{
+  "dataset_settings": {
+    "name": "melanoma"
+  },
+  "model_settings": {
+    "batch_size": 100,
+    "epochs": 200,
+    "name": "vggtop",
+    "posterior_samples": 100
+  },
+  "num_experiments": 1,
+  "seed": 1337
+}
