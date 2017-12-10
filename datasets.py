@@ -133,20 +133,6 @@ class CIFAR100(Dataset):
         super(CIFAR100, self).__init__('classification', *args, **kwargs)
         (x_train, y_train), (x_test, y_test) = cifar100.load_data()
 
-        # print('before', x_train.shape)
-        # imgs = []
-        # for img in tqdm.tqdm(x_train, desc='Resizing train'):
-        #     imgs.append(imresize(img, size=2.0))
-        # x_train = np.array(imgs)
-        # print('after', x_train.shape)
-        #
-        # print('before', x_test.shape)
-        # imgs = []
-        # for img in tqdm.tqdm(x_test, desc='Resizing test'):
-        #     imgs.append(imresize(img, size=2.0))
-        # x_test = np.array(imgs)
-        # print('after', x_test.shape)
-
         x_train = x_train/255
         x_test = x_test/255
 
@@ -185,6 +171,10 @@ class CIFAR100(Dataset):
         self.y_val = y_train[split:]
         self.x_test = x_test
         self.y_test = y_test
+
+        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        self.x_train = self.x_train[idxs]
+        self.y_train = self.y_train[idxs]
 
 
 class Melanoma(Dataset):
