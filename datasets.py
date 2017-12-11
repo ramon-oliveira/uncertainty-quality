@@ -186,6 +186,10 @@ class CIFAR100(Dataset):
         self.x_test = x_test
         self.y_test = y_test
 
+        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        self.x_train = self.x_train[idxs]
+        self.y_train = self.y_train[idxs]
+
 
 class Melanoma(Dataset):
 
