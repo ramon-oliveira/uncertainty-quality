@@ -60,9 +60,9 @@ def cfg_motorola_triage():
 
     model_settings = {
         'name': 'mlp',
-        'layers': [128],
+        'layers': [256],
         'epochs': 100,
-        'batch_size': 100,
+        'batch_size': 50,
         'posterior_samples': 100,
     }
 
