@@ -52,7 +52,7 @@ def cfg_cifar100():
 @ex.named_config
 def cfg_motorola_triage():
     seed = 1337
-    num_experiments = 1
+    num_experiments = 10
 
     dataset_settings = {
         'name': 'motorola_triage',
