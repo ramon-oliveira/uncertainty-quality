@@ -49,6 +49,24 @@ def cfg_cifar100():
     }
 
 
+@ex.named_config
+def cfg_motorola_triage():
+    seed = 1337
+    num_experiments = 1
+
+    dataset_settings = {
+        'name': 'motorola_triage',
+    }
+
+    model_settings = {
+        'name': 'mlp',
+        'layers': [128],
+        'epochs': 100,
+        'batch_size': 100,
+        'posterior_samples': 100,
+    }
+
+
 @ex.capture
 def train(model, dataset):
     model.fit(dataset.x_train, dataset.y_train, dataset.x_val, dataset.y_val, save_dir=storage_observer.dir)

@@ -229,6 +229,8 @@ def evaluate(model, dataset):
     print('--'*10, 'STACKING', '--'*10)
     uncertainty_metrics(info, 'stacking', success, uncertainty)
 
+    if len(x_test.shape) < 4:
+        return info
 
     classes = dataset.classes
     examples = []

@@ -13,6 +13,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import keras.backend as K
 from scipy.misc import imresize
 import re
+import joblib as jl
 
 
 class Dataset(object):
@@ -165,6 +166,50 @@ class CIFAR100(Dataset):
         print('classes:', len(self.classes))
 
         split = 42000
+        self.x_train = x_train[:split]
+        self.y_train = y_train[:split]
+        self.x_val = x_train[split:]
+        self.y_val = y_train[split:]
+        self.x_test = x_test
+        self.y_test = y_test
+
+        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        self.x_train = self.x_train[idxs]
+        self.y_train = self.y_train[idxs]
+
+
+class MotorolaTriage(Dataset):
+
+    def __init__(self, *args, **kwargs):
+        super(MotorolaTriage, self).__init__('classification', *args, **kwargs)
+        data = jl.load(open('data/motorola_triage/motorola_triage.pkl', 'rb'))
+        data = data[0]
+        x_train = data['train']['x'].toarray()
+        y_train = data['train']['y_true']
+        classes = sorted(list(set(y_train.tolist())))
+
+        x_test = data['test']['x'].toarray()
+        y_test = data['test']['y_true']
+        mask = np.in1d(y_test, classes)
+        x_test = x_test[mask]
+        y_test = y_test[mask]
+
+        y_train = np.array([np.eye(len(classes))[classes.index(c)] for c in y_train])
+        y_test = np.array([np.eye(len(classes))[classes.index(c)] for c in y_test])
+
+        print(x_train.shape, y_train.shape)
+        print(x_test.shape, y_test.shape)
+
+        self.sota = {
+            'accuracy': 54,
+            'reference': '',
+        }
+        self.input_shape = x_train.shape[1:]
+        self.output_size = len(classes)
+        self.classes = classes
+        print('classes:', len(self.classes))
+
+        split = int(x_train.shape[0]*0.8)
         self.x_train = x_train[:split]
         self.y_train = y_train[:split]
         self.x_val = x_train[split:]
@@ -378,6 +423,8 @@ def load(settings):
         dataset = CIFAR100(**settings)
     elif name == 'melanoma':
         dataset = Melanoma(**settings)
+    elif name == 'motorola_triage':
+        dataset = MotorolaTriage(**settings)
     elif name == 'boston_housing':
         dataset = BostonHousing(**settings)
     elif name == 'kin8nm':

@@ -41,10 +41,8 @@ class BaseModel(object):
         self.batch_size = batch_size
         self.posterior_samples = posterior_samples
 
-    def fit(self, x_train, y_train, x_val, y_val, save_dir='runs'):
-        weights_filename = os.path.join(save_dir, uuid.uuid4().hex + '.hdf5')
-        cp = ModelCheckpoint(weights_filename, save_best_only=True)
 
+    def _fit_images(self, x_train, y_train, x_val, y_val, callbacks):
         datagen = ImageDataGenerator(
             featurewise_center=False,
             samplewise_center=False,
@@ -62,12 +60,30 @@ class BaseModel(object):
                             steps_per_epoch=int(np.ceil(x_train.shape[0]/self.batch_size)),
                             epochs=self.epochs,
                             validation_data=(x_val, y_val),
-                            callbacks=[cp],
+                            callbacks=callbacks,
                             workers=4)
+
+
+
+    def fit(self, x_train, y_train, x_val, y_val, save_dir='/tmp'):
+        save_dir = save_dir or '/tmp'
+        weights_filename = os.path.join(save_dir, uuid.uuid4().hex + '.hdf5')
+        cp = ModelCheckpoint(weights_filename, save_best_only=True)
+        callbacks = [cp]
+
+        if len(x_train.shape) == 4:
+            self._fit_images(x_train, y_train, x_val, y_val, callbacks)
+        else:
+            self.model.fit(x_train, y_train,
+                           batch_size=self.batch_size,
+                           epochs=self.epochs,
+                           validation_data=(x_val, y_val),
+                           callbacks=callbacks)
+
 
         self.model.load_weights(weights_filename)
         self.probabilistic_model.set_weights(self.model.get_weights())
-        # os.remove(weights_filename)
+        os.remove(weights_filename)
         return self
 
     def predict(self, x, probabilistic=False):
@@ -89,33 +105,29 @@ class MLP(BaseModel):
         super(MLP, self).__init__(*args, **kwargs)
         self.dropout = dropout
 
-        tau = 0.159707652696 # obtained from BO
-        lengthscale = 1e-2
-        reg = lengthscale**2 * (1 - dropout) / (2. * len(dataset.x_train) * tau)
-
         # deterministic model
         model = Sequential()
         model.add(Dense(layers[0], input_shape=dataset.input_shape))
         model.add(Dropout(dropout))
-        model.add(Activation('selu'))
+        model.add(Activation('relu'))
         for units in layers[1:]:
             model.add(Dense(units))
             model.add(Dropout(dropout))
-            model.add(Activation('selu'))
+            model.add(Activation('relu'))
         model.add(Dense(dataset.output_size))
 
         # probabilistic model
         probabilistic_model = Sequential()
         probabilistic_model.add(Dense(layers[0], input_shape=dataset.input_shape))
         probabilistic_model.add(BayesianDropout(dropout))
-        probabilistic_model.add(Activation('selu'))
+        probabilistic_model.add(Activation('relu'))
         for units in layers[1:]:
             probabilistic_model.add(Dense(units))
             probabilistic_model.add(BayesianDropout(dropout))
-            probabilistic_model.add(Activation('selu'))
+            probabilistic_model.add(Activation('relu'))
         probabilistic_model.add(Dense(dataset.output_size))
 
-        opt = optimizers.Nadam()
+        opt = optimizers.Adam()
         if dataset.type == 'classification':
             model.add(Activation('softmax'))
             probabilistic_model.add(Activation('softmax'))
