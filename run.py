@@ -52,7 +52,7 @@ def cfg_cifar100():
 @ex.named_config
 def cfg_motorola_triage():
     seed = 1337
-    num_experiments = 10
+    num_experiments = 25
 
     dataset_settings = {
         'name': 'motorola_triage',
@@ -60,7 +60,7 @@ def cfg_motorola_triage():
 
     model_settings = {
         'name': 'mlp',
-        'layers': [512, 512],
+        'layers': [50],
         'epochs': 50,
         'batch_size': 50,
         'posterior_samples': 100,
@@ -87,7 +87,7 @@ def run(model_settings, dataset_settings, num_experiments, _log):
     ex.info['evaluations'] = []
     for i in range(1, num_experiments+1):
         print('#'*10, 'Run', i, '#'*10)
-        dataset_settings['train_size'] = i/num_experiments
+        dataset_settings['train_size'] = i - 1
         dataset = datasets.load(dataset_settings)
         model_settings.update({'dataset': dataset})
         model = models.load(model_settings)

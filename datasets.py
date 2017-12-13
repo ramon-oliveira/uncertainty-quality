@@ -183,7 +183,8 @@ class MotorolaTriage(Dataset):
     def __init__(self, *args, **kwargs):
         super(MotorolaTriage, self).__init__('classification', *args, **kwargs)
         data = jl.load(open('data/motorola_triage/motorola_triage.pkl', 'rb'))
-        data = data[0]
+        len(data)
+        data = data[self.train_size]
         x_train = data['train']['x'].toarray()
         y_train = data['train']['y_true']
         classes = sorted(list(set(y_train.tolist())))
@@ -217,9 +218,9 @@ class MotorolaTriage(Dataset):
         self.x_test = x_test
         self.y_test = y_test
 
-        idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
-        self.x_train = self.x_train[idxs]
-        self.y_train = self.y_train[idxs]
+        # idxs = np.random.choice(split, replace=False, size=int(split*self.train_size))
+        # self.x_train = self.x_train[idxs]
+        # self.y_train = self.y_train[idxs]
 
 
 class Melanoma(Dataset):
