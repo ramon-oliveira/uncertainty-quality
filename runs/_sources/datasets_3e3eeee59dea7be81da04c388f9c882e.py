@@ -248,9 +248,9 @@ class MotorolaBattery(Dataset):
             'accuracy': 0.96381,
             'reference': '',
         }
-        self.classes = ['not-bug', 'bug']
         self.input_shape = x_train.shape[1:]
-        self.output_size = len(self.classes)
+        self.output_size = len(classes)
+        self.classes = ['not-bug', 'bug']
         print('classes:', len(self.classes))
 
         split = int(x_train.shape[0]*0.8)
@@ -470,8 +470,6 @@ def load(settings):
         dataset = Melanoma(**settings)
     elif name == 'motorola_triage':
         dataset = MotorolaTriage(**settings)
-    elif name == 'motorola_battery':
-        dataset = MotorolaBattery(**settings)
     elif name == 'boston_housing':
         dataset = BostonHousing(**settings)
     elif name == 'kin8nm':

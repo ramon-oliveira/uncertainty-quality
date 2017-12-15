@@ -73,7 +73,7 @@ def cfg_motorola_battery():
     num_experiments = 10
 
     dataset_settings = {
-        'name': 'motorola_battery',
+        'name': 'motorola_triage',
     }
 
     model_settings = {

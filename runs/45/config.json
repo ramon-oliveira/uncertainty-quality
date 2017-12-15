@@ -1,0 +1,16 @@
+{
+  "dataset_settings": {
+    "name": "motorola_battery"
+  },
+  "model_settings": {
+    "batch_size": 50,
+    "epochs": 50,
+    "layers": [
+      512
+    ],
+    "name": "mlp",
+    "posterior_samples": 100
+  },
+  "num_experiments": 10,
+  "seed": 1337
+}
